@@ -37,3 +37,15 @@ def get_first_words (text, max_l = 24):
         j = text.find (' ', i + 1, max_l)
 
     return text[:i] + "..."
+
+def str2list (match, sep = ' '):
+    match = match.strip ()
+    words = match.split (sep)
+    ret = []
+
+    for word in words:
+        word.strip ()
+        if word:
+            ret.append (word)
+
+    return ret
