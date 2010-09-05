@@ -304,3 +304,30 @@ class Comment (models.Model):
 
 class EventComment (Comment):
     event = ForeignKey (Event)
+
+
+class ApplicationType (models.Model):
+    name = CharField (max_length = 63)
+    listeners = ManyToManyField (Participant, blank = True, related_name =
+                                 "%(app_label)s_%(class)s_related")
+
+    def __unicode__ (self):
+        return self.name
+
+
+class Application (models.Model):
+    status_choices = ((0, 'Unread'), (1, 'Read'), (2, 'Accepted'),
+                      (3, 'Rejected'))
+    participant = ForeignKey (Participant, related_name = 'appli_part')
+    status = PositiveSmallIntegerField (choices = status_choices, default = 0)
+    atype = ForeignKey (ApplicationType, verbose_name = "Application type")
+
+    class Meta:
+        abstract = True
+
+
+class EventApplication (Application):
+    event = ForeignKey (Event)
+
+    def __unicode__ (self):
+        return "%s for %s" % (self.participant, self.event)
