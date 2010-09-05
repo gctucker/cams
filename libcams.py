@@ -1,3 +1,8 @@
+CAMS_VERSION = (0, 0, 0)
+
+# -----------------------------------------------------------------------------
+# Page system
+
 class Page ():
     OPEN = 0
     ADMIN = 1
@@ -8,22 +13,23 @@ class Page ():
         self.title = title
         self.group = group
 
-def filter_pages (group):
+def filter_pages (page_list, group):
     filtered = []
 
-    for p in PAGE_LIST:
+    for p in page_list:
         if p.group == group:
             filtered.append (p)
 
     return filtered
 
-def get_user_pages (user):
+def get_user_pages (page_list, user):
     if user.is_staff:
-        return PAGE_LIST
+        return page_list
     else:
         return filter_pages (Page.OPEN)
 
 # -----------------------------------------------------------------------------
+# Helpers
 
 def get_first_words (text, max_l = 24):
     if len (text) <= max_l:
