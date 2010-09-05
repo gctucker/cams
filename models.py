@@ -10,10 +10,19 @@ from django.db.models.query import Q
 from django.contrib.auth.models import User
 from libcams import get_first_words
 
+class Record (models.Model):
+    status_choice = ((0, 'new'), (1, 'active'), (2, 'disabled'))
+    status = PositiveSmallIntegerField (choices = status_choice, default = 1)
+    created = DateTimeField (auto_now_add = True)
+
+    class Meta:
+        abstract = True
+
+
 # -----------------------------------------------------------------------------
 # address book
 
-class Person (models.Model):
+class Person (Record):
     titles = ((0, 'Mr'), (1, 'Miss'), (2, 'Ms'), (3, 'Mrs'), (4, 'Dr'),
               (5, 'Prof'), (6, 'Sir'), (7, 'Lord'), (8, 'Lady'), (9, 'Rev'))
 
@@ -45,7 +54,7 @@ class Person (models.Model):
         verbose_name_plural = 'people'
 
 
-class Organisation (models.Model):
+class Organisation (Record):
     name = CharField (max_length = 127, unique = True)
     nickname = CharField (max_length = 31, blank = True)
     members = ManyToManyField (Person, through = 'Member')
@@ -60,7 +69,7 @@ class Organisation (models.Model):
         ordering = ['name']
 
 
-class Member (models.Model):
+class Member (Record):
     title = CharField (max_length = 63, blank = True, help_text =
                        "Role of that person within the organisation.")
     organisation = ForeignKey (Organisation)
@@ -74,7 +83,7 @@ class Member (models.Model):
         unique_together = (('organisation', 'person'))
 
 
-class Contact (models.Model):
+class Contact (Record):
     line_1 = CharField (max_length = 63, blank = True)
     line_2 = CharField (max_length = 63, blank = True)
     line_3 = CharField (max_length = 63, blank = True)
@@ -185,7 +194,7 @@ class Fair (models.Model):
             super (Fair, self).save (*args, **kwargs)
 
 
-class Participant (models.Model):
+class Participant (Record):
     person = OneToOneField (Person, blank = False, null = False)
     user = OneToOneField (User, blank = True, null = True)
 
@@ -205,7 +214,7 @@ class Participant (models.Model):
         return groups_str
 
 
-class Item (models.Model):
+class Item (Record):
     name = CharField (max_length = 63)
     description = TextField (blank = True)
     owner = ForeignKey (Participant)
@@ -241,7 +250,7 @@ class Event (Item):
         return str (when)
 
 
-class Actor (models.Model):
+class Actor (Record):
     participant = ForeignKey (Participant)
     event = ForeignKey (Event, related_name = 'event_actor')
     role = CharField (max_length = 127, blank = True)
@@ -284,7 +293,7 @@ class Role (models.Model):
         return self.role
 
 
-class Comment (models.Model):
+class Comment (Record):
     author = ForeignKey (User)
     time = DateTimeField (auto_now = True)
     text = TextField ()
@@ -319,8 +328,10 @@ class Application (models.Model):
     status_choices = ((0, 'Unread'), (1, 'Read'), (2, 'Accepted'),
                       (3, 'Rejected'))
     participant = ForeignKey (Participant, related_name = 'appli_part')
+    atype = ForeignKey (ApplicationType, verbose_name = "Application type",
+                        blank = True, null = True)
     status = PositiveSmallIntegerField (choices = status_choices, default = 0)
-    atype = ForeignKey (ApplicationType, verbose_name = "Application type")
+    created = DateTimeField (auto_now_add = True)
 
     class Meta:
         abstract = True

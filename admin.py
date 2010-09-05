@@ -34,6 +34,7 @@ class MemberContactInline (ContactInline):
 
 class MemberInline (admin.TabularInline):
     model = Organisation.members.through
+    fields = ('person', 'title')
     raw_id_fields = ('person', )
     extra = 3
 
@@ -44,7 +45,8 @@ class PersonAdmin (admin.ModelAdmin):
     fieldsets = ((None,
                   {'fields': ('title',
                               ('first_name', 'last_name'),
-                              ('middle_name', 'nickname'))}),
+                              ('middle_name', 'nickname'),
+                              'status')}),
                  ('Friends and relatives',
                   {'classes': ('collapse', ),
                    'fields': ('alter', )}))
