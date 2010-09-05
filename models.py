@@ -52,6 +52,7 @@ class Person (Record):
     class Meta:
         ordering = ['first_name']
         verbose_name_plural = 'people'
+        db_table = 'cams_abook_person'
 
 
 class Organisation (Record):
@@ -67,6 +68,7 @@ class Organisation (Record):
 
     class Meta:
         ordering = ['name']
+        db_table = 'cams_abook_organisation'
 
 
 class Member (Record):
@@ -81,6 +83,7 @@ class Member (Record):
 
     class Meta:
         unique_together = (('organisation', 'person'))
+        db_table = 'cams_abook_member'
 
 
 class Contact (Record):
@@ -138,21 +141,21 @@ class PersonContact (Contact):
     person = ForeignKey (Person)
 
     class Meta:
-        db_table = 'cams_p_contact'
+        db_table = 'cams_abook_p_contact'
 
 
 class OrganisationContact (Contact):
     org = ForeignKey (Organisation)
 
     class Meta:
-        db_table = 'cams_o_contact'
+        db_table = 'cams_abook_o_contact'
 
 
 class MemberContact (Contact):
     member = ForeignKey (Member)
 
     class Meta:
-        db_table = 'cams_m_contact'
+        db_table = 'cams_abook_m_contact'
 
 # -----------------------------------------------------------------------------
 # management
@@ -294,7 +297,7 @@ class Role (models.Model):
 
 
 class Comment (Record):
-    author = ForeignKey (User)
+    author = ForeignKey (Participant)
     time = DateTimeField (auto_now = True)
     text = TextField ()
 
