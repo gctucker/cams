@@ -298,7 +298,6 @@ class Role (models.Model):
 
 class Comment (Record):
     author = ForeignKey (Participant)
-    time = DateTimeField (auto_now = True)
     text = TextField ()
 
     def __unicode__ (self):
