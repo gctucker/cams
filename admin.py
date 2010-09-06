@@ -127,8 +127,8 @@ class ActorAdmin (admin.ModelAdmin):
 
 
 class CommentAdmin (admin.ModelAdmin):
-    list_display = ('time', 'author', '__unicode__')
-    ordering = ['-time']
+    list_display = ('created', 'author', '__unicode__')
+    ordering = ['-created']
     raw_id_fields = ['author']
 
 
