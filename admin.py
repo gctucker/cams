@@ -60,7 +60,7 @@ class OrganisationAdmin (admin.ModelAdmin):
     list_display = ('name', )
     list_per_page = 50
     search_fields = ('name', 'nickname')
-    fieldsets = ((None, {'fields': (('name', 'nickname'))}), )
+    fieldsets = ((None, {'fields': (('name', 'nickname'), 'status')}), )
     inlines = [OrgContactInline, MemberInline]
 
 
