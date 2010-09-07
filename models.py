@@ -49,6 +49,14 @@ class Person (Record):
 #    def get_absolute_url (self):
 #        return URL_PREFIX + "abook/person/%i" % self.id
 
+    # ToDo: create special tag instead ?
+    @property
+    def contact (self):
+        if self.personcontact_set.count ():
+            return self.personcontact_set.all ()[0]
+        else:
+            return None
+
     class Meta:
         ordering = ['first_name']
         verbose_name_plural = 'people'
@@ -66,6 +74,13 @@ class Organisation (Record):
 #    def get_absolute_url (self):
 #        return URL_PREFIX + "abook/org/%i" % self.id
 
+    @property
+    def contact (self):
+        if self.organisationcontact_set.count ():
+            return self.organisationcontact_set.all ()[0]
+        else:
+            return None
+
     class Meta:
         ordering = ['name']
         db_table = 'cams_abook_organisation'
@@ -80,6 +95,13 @@ class Member (Record):
     def __unicode__ (self):
         return (self.person.__unicode__ () + ", member of " +
                 self.organisation.__unicode__ ())
+
+    @property
+    def contact (self):
+        if self.membercontact_set.count ():
+            return self.membercontact_set.all ()[0]
+        else:
+            return None
 
     class Meta:
         unique_together = (('organisation', 'person'))
