@@ -30,6 +30,7 @@ class OrgContactInline (ContactInline):
 
 class MemberContactInline (ContactInline):
     model = MemberContact
+    max_num = 1
 
 
 class MemberInline (admin.TabularInline):
