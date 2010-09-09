@@ -143,4 +143,5 @@ class ApplicationAdmin (admin.ModelAdmin):
 
 
 class EventApplicationAdmin (ApplicationAdmin):
+    list_display = ['participant', 'event', 'status']
     raw_id_fields = ApplicationAdmin.raw_id_fields + ['event']
