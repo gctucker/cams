@@ -126,14 +126,19 @@ class Member (Record):
 
 
 class Contact (Record):
+    email_help_text = "A valid e-mail looks like myself@whatever.com"
+    website_help_text = "A valid URL looks like http://site.com"
+
     line_1 = CharField (max_length = 63, blank = True)
     line_2 = CharField (max_length = 63, blank = True)
     line_3 = CharField (max_length = 63, blank = True)
     town = CharField (max_length = 63, blank = True)
     postcode = CharField (max_length = 15, blank = True)
     country = CharField (max_length = 63, blank = True)
-    email = EmailField (blank = True, max_length = 127)
-    website = URLField (max_length = 255, verify_exists = False, blank = True)
+    email = EmailField (blank = True, max_length = 127, help_text =
+                        email_help_text)
+    website = URLField (max_length = 255, verify_exists = False, blank = True,
+                        help_text = website_help_text)
     telephone = CharField (max_length = 127, blank = True)
     mobile = CharField (max_length = 127, blank = True)
     fax = CharField (max_length = 31, blank = True)
