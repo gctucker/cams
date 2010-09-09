@@ -11,8 +11,13 @@ from django.contrib.auth.models import User
 from libcams import get_first_words
 
 class Record (models.Model):
-    status_choice = ((0, 'new'), (1, 'active'), (2, 'disabled'))
-    status = PositiveSmallIntegerField (choices = status_choice, default = 1)
+    NEW = 0
+    ACTIVE = 1
+    DISABLED = 2
+
+    xstatus = ((NEW, 'new'), (ACTIVE, 'active'), (DISABLED, 'disabled'))
+
+    status = PositiveSmallIntegerField (choices = xstatus, default = ACTIVE)
     created = DateTimeField (auto_now_add = True)
 
     class Meta:
@@ -23,8 +28,20 @@ class Record (models.Model):
 # address book
 
 class Person (Record):
-    titles = ((0, 'Mr'), (1, 'Miss'), (2, 'Ms'), (3, 'Mrs'), (4, 'Dr'),
-              (5, 'Prof'), (6, 'Sir'), (7, 'Lord'), (8, 'Lady'), (9, 'Rev'))
+    MR = 0
+    MISS = 1
+    MS = 2
+    MRS = 3
+    DR = 4
+    PROF = 5
+    SIR = 6
+    LORD = 7
+    LADY = 8
+    REV = 9
+
+    titles = ((MR, 'Mr'), (MISS, 'Miss'), (MS, 'Ms'), (MRS, 'Mrs'), (DR, 'Dr'),
+              (PROF, 'Prof'), (SIR, 'Sir'), (LORD, 'Lord'), (LADY, 'Lady'),
+              (REV, 'Rev'))
 
     title = PositiveSmallIntegerField (choices = titles, blank = True,
                                        null = True)
@@ -355,12 +372,18 @@ class ApplicationType (models.Model):
 
 
 class Application (models.Model):
-    status_choices = ((0, 'Unread'), (1, 'Read'), (2, 'Accepted'),
-                      (3, 'Rejected'))
+    PENDING = 0
+    ACCEPTED = 1
+    REJECTED = 2
+
+    xstatus = ((PENDING, 'Pending'),
+               (ACCEPTED, 'Accepted'),
+               (REJECTED, 'Rejected'))
+
     participant = ForeignKey (Participant, related_name = 'appli_part')
     atype = ForeignKey (ApplicationType, verbose_name = "Application type",
                         blank = True, null = True)
-    status = PositiveSmallIntegerField (choices = status_choices, default = 0)
+    status = PositiveSmallIntegerField (choices = xstatus, default = PENDING)
     created = DateTimeField (auto_now_add = True)
 
     class Meta:
