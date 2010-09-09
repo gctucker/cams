@@ -72,7 +72,7 @@ class MemberAdmin (admin.ModelAdmin):
                      'person__last_name', 'person__nickname',
                      'organisation__name', 'organisation__nickname')
     inlines = [MemberContactInline]
-    raw_id_fields = [ 'person', 'organisation']
+    raw_id_fields = ['person', 'organisation']
 
 # -----------------------------------------------------------------------------
 # management
@@ -89,7 +89,6 @@ class RoleInline (admin.TabularInline):
 
 class GroupAdmin (admin.ModelAdmin):
     search_fields = ('name', 'fair__date')
-    raw_id_fields = ['fair']
 
 
 class FairAdmin (admin.ModelAdmin):
@@ -103,7 +102,6 @@ class ParticipantAdmin (admin.ModelAdmin):
     list_display = ('person', 'current_groups')
     list_per_page = 30
     inlines = [RoleInline]
-    raw_id_fields = ['person', 'user']
 
 
 class EventAdmin (admin.ModelAdmin):
@@ -112,7 +110,6 @@ class EventAdmin (admin.ModelAdmin):
     list_display_links = ('__unicode__', )
     list_per_page = 30
     ordering = ['-date', '-time']
-    raw_id_fields = ['org', 'owner']
 
 
 class ActorAdmin (admin.ModelAdmin):

@@ -218,6 +218,9 @@ class Fair (models.Model):
 
             super (Fair, self).save (*args, **kwargs)
 
+    class Meta:
+        ordering = ['-date']
+
 
 class Participant (Record):
     person = OneToOneField (Person, blank = False, null = False)
@@ -237,6 +240,9 @@ class Participant (Record):
                 groups_str += g.name
 
         return groups_str
+
+    class Meta:
+        ordering = ['person__last_name', 'person__first_name']
 
 
 class Item (Record):
