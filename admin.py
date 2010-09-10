@@ -2,8 +2,7 @@ from django.contrib import admin
 from cams.models import (Person, Organisation, Member,
                          PersonContact, OrganisationContact, MemberContact,
                          Participant, Group, Actor, Event, Fair, Role,
-                         Comment, EventComment,
-                         ApplicationType, Application, EventApplication)
+                         Comment, EventComment, Application, EventApplication)
 
 # -----------------------------------------------------------------------------
 # address book
@@ -132,10 +131,6 @@ class CommentAdmin (admin.ModelAdmin):
 
 class EventCommentAdmin (CommentAdmin):
     raw_id_fields = CommentAdmin.raw_id_fields + ['event']
-
-
-class ApplicationTypeAdmin (admin.ModelAdmin):
-    filter_horizontal = ['listeners']
 
 
 class ApplicationAdmin (admin.ModelAdmin):
