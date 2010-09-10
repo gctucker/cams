@@ -10,6 +10,17 @@ from django.db.models.query import Q
 from django.contrib.auth.models import User
 from libcams import get_first_words
 
+def get_user_email (u):
+    if u.email:
+        return u.email
+    else:
+        part = Participant.objects.get (user = u)
+        p = part.person
+        contacts = PersonContact.objects.filter (person = p)
+        for c in contacts:
+            if c.email:
+                return c.email
+
 class Record (models.Model):
     NEW = 0
     ACTIVE = 1
