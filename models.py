@@ -378,15 +378,6 @@ class EventComment (Comment):
     event = ForeignKey (Event)
 
 
-class ApplicationType (models.Model):
-    name = CharField (max_length = 63)
-    listeners = ManyToManyField (Participant, blank = True, related_name =
-                                 "%(app_label)s_%(class)s_related")
-
-    def __unicode__ (self):
-        return self.name
-
-
 class Application (models.Model):
     PENDING = 0
     ACCEPTED = 1
@@ -397,8 +388,6 @@ class Application (models.Model):
                (REJECTED, 'Rejected'))
 
     participant = ForeignKey (Participant, related_name = 'appli_part')
-    atype = ForeignKey (ApplicationType, verbose_name = "Application type",
-                        blank = True, null = True)
     status = PositiveSmallIntegerField (choices = xstatus, default = PENDING)
     created = DateTimeField (auto_now_add = True)
 
