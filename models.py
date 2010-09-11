@@ -73,6 +73,12 @@ class Person (Record):
             name += ' (' + self.nickname + ')'
         return name
 
+    def title_str (self):
+        if self.title != None:
+            return Person.titles[self.title][1]
+        else:
+            return ''
+
 #    ToDo: create a proxy model and add this in the 'extra' app
 #    def get_absolute_url (self):
 #        return URL_PREFIX + "abook/person/%i" % self.id
@@ -147,7 +153,7 @@ class Contact (Record):
     postcode = CharField (max_length = 15, blank = True)
     country = CharField (max_length = 63, blank = True)
     email = EmailField (blank = True, max_length = 127, help_text =
-                        email_help_text)
+                        email_help_text, verbose_name = "E-mail")
     website = URLField (max_length = 255, verify_exists = False, blank = True,
                         help_text = website_help_text)
     telephone = CharField (max_length = 127, blank = True)
