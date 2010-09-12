@@ -26,7 +26,7 @@ def get_user_pages (page_list, user):
     if user.is_staff:
         return page_list
     else:
-        return filter_pages (Page.OPEN)
+        return filter_pages (page_list, Page.OPEN)
 
 # -----------------------------------------------------------------------------
 # Helpers
