@@ -31,6 +31,9 @@ class Record (models.Model):
     status = PositiveSmallIntegerField (choices = xstatus, default = ACTIVE)
     created = DateTimeField (auto_now_add = True)
 
+    def status_str (self):
+        return Record.xstatus[self.status][1]
+
     class Meta:
         abstract = True
 
