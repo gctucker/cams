@@ -91,6 +91,7 @@ class RoleInline (admin.TabularInline):
 
 class GroupAdmin (admin.ModelAdmin):
     search_fields = ['name', 'fair__date']
+    list_filter = ['fair']
 
 
 class FairAdmin (admin.ModelAdmin):
