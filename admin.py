@@ -39,10 +39,16 @@ class MemberInline (admin.TabularInline):
     extra = 3
 
 
-class PersonAdmin (admin.ModelAdmin):
+class RecordAdmin (admin.ModelAdmin):
+    list_filter = ['status']
+    date_hierarchy = 'created'
+    list_display = ['created', 'status']
+
+
+class PersonAdmin (RecordAdmin):
     list_per_page = 50
     search_fields = ['first_name', 'middle_name', 'last_name', 'nickname']
-    list_display = ['first_name', 'last_name', 'created']
+    list_display = ['first_name', 'last_name'] + RecordAdmin.list_display
     fieldsets = [(None,
                   {'fields': ('title',
                               ('first_name', 'last_name'),
@@ -54,20 +60,19 @@ class PersonAdmin (admin.ModelAdmin):
     radio_fields = {'title': admin.HORIZONTAL}
     filter_horizontal = ['alter']
     inlines = [PersonContactInline]
-    list_filter = ['status']
 
 
-class OrganisationAdmin (admin.ModelAdmin):
-    list_display = ['name']
+class OrganisationAdmin (RecordAdmin):
+    list_display = ['name'] + RecordAdmin.list_display
     list_per_page = 50
     search_fields = ['name', 'nickname']
     fieldsets = [(None, {'fields': (('name', 'nickname'), 'status')})]
     inlines = [OrgContactInline, MemberInline]
-    list_filter = ['status']
 
 
-class MemberAdmin (admin.ModelAdmin):
-    list_display = ['person', 'organisation', 'title']
+class MemberAdmin (RecordAdmin):
+    list_display = ['person', 'organisation', 'title'] \
+                   + RecordAdmin.list_display
     ordering = ('person', )
     list_per_page = 50
     search_fields = ['person__first_name', 'person__middle_name',
@@ -90,6 +95,7 @@ class RoleInline (admin.TabularInline):
 
 
 class GroupAdmin (admin.ModelAdmin):
+    list_display = ['__unicode__', 'description']
     search_fields = ['name', 'fair__date']
     list_filter = ['fair']
 
@@ -99,38 +105,39 @@ class FairAdmin (admin.ModelAdmin):
     ordering = ('-date', )
 
 
-class ParticipantAdmin (admin.ModelAdmin):
+class ParticipantAdmin (RecordAdmin):
     search_fields = ['person__first_name', 'person__middle_name',
                      'person__last_name', 'person__nickname']
-    list_display = ['person', 'current_groups']
+    list_display = ['person', 'current_groups'] + RecordAdmin.list_display
     list_per_page = 30
     inlines = [RoleInline]
-    list_filter = ['status']
 
 
-class EventAdmin (admin.ModelAdmin):
+class EventAdmin (RecordAdmin):
     search_fields = ['name', 'org__name']
-    list_display = ['__unicode__', 'date', 'time', 'org', 'owner', 'status']
+    list_display = ['__unicode__', 'date', 'time', 'org', 'owner'] \
+                   + RecordAdmin.list_display
     list_display_links = ['__unicode__']
     list_per_page = 30
     ordering = ('-date', '-time')
-    list_filter = ['status', 'fair']
+    list_filter = RecordAdmin.list_filter + ['fair']
 
 
-class ActorAdmin (admin.ModelAdmin):
+class ActorAdmin (RecordAdmin):
     search_fields = ['event__name', 'participant__person__first_name',
                      'participant__person__middle_name',
                      'participant__person__last_name',
                      'participant__person__nickname']
-    list_display = ['date', '__unicode__']
+    list_display = ['date', '__unicode__'] + RecordAdmin.list_display
     list_display_links = ['date', '__unicode__']
     list_per_page = 30
     ordering = ('-event__date', )
     raw_id_fields = ['event', 'participant']
 
 
-class CommentAdmin (admin.ModelAdmin):
-    list_display = ['created', 'author', '__unicode__']
+class CommentAdmin (RecordAdmin):
+    list_display = ['created', 'author', '__unicode__'] \
+                   + RecordAdmin.list_display
     ordering = ('-created', )
     raw_id_fields = ['author']
 
@@ -144,5 +151,5 @@ class ApplicationAdmin (admin.ModelAdmin):
 
 
 class EventApplicationAdmin (ApplicationAdmin):
-    list_display = ['participant', 'event', 'status']
+    list_display = ['participant', 'event'] + RecordAdmin.list_display
     raw_id_fields = ApplicationAdmin.raw_id_fields + ['event']
