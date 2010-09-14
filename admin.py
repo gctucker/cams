@@ -105,10 +105,11 @@ class ParticipantAdmin (admin.ModelAdmin):
 
 class EventAdmin (admin.ModelAdmin):
     search_fields = ('name', 'org__name')
-    list_display = ('__unicode__', 'date', 'time', 'org', 'location', 'owner')
+    list_display = ('__unicode__', 'date', 'time', 'org', 'owner', 'status')
     list_display_links = ('__unicode__', )
     list_per_page = 30
     ordering = ['-date', '-time']
+    list_filter = ('status', 'fair')
 
 
 class ActorAdmin (admin.ModelAdmin):
