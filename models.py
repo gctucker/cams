@@ -95,7 +95,7 @@ class Person (Record):
             return None
 
     class Meta:
-        ordering = ['first_name']
+        ordering = ['first_name', 'last_name']
         verbose_name_plural = 'people'
         db_table = 'cams_abook_person'
 
@@ -284,7 +284,7 @@ class Participant (Record):
         return groups_str
 
     class Meta:
-        ordering = ['person__last_name', 'person__first_name']
+        ordering = ['person__first_name', 'person__last_name']
 
 
 class Item (Record):
@@ -304,7 +304,7 @@ class Event (Item):
     team = ManyToManyField (Participant, related_name = 'event_team',
                             through = 'Actor')
     date = DateField ()
-    time = TimeField (blank = True, null = True)
+    time = TimeField (blank = True, null = True, verbose_name = "start time")
     end_date = DateField (blank = True, null = True)
     end_time = TimeField (blank = True, null = True)
     org = ForeignKey (Organisation, blank = True, null = True,
