@@ -59,7 +59,7 @@ class Person (Record):
 
     title = PositiveSmallIntegerField (choices = titles, blank = True,
                                        null = True)
-    first_name = CharField (max_length = 127)
+    first_name = CharField (max_length = 127, blank = True)
     middle_name = CharField (max_length = 31, blank = True)
     last_name = CharField (max_length = 127, blank = True)
     nickname = CharField (max_length = 31, blank = True)
@@ -176,6 +176,7 @@ class Contact (Record):
                 contact += ', ' + self.line_2
                 if self.line_3:
                     contact += ', ' + self.line_3
+
         if self.town:
             if contact:
                 contact += ', '
@@ -192,8 +193,10 @@ class Contact (Record):
                 contact = self.website
             elif self.telephone:
                 contact = str (self.telephone)
+            elif self.mobile:
+                contact = str (self.mobile)
             else:
-                contact = str (self.id)
+                contact = '[empty contact]'
 
         return contact
 
