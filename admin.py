@@ -1,11 +1,11 @@
 from django.contrib import admin
 from cams.models import (Person, Organisation, Member,
                          PersonContact, OrganisationContact, MemberContact,
-                         Participant, Group, Actor, Event, Fair, Role,
+                         Player, Group, Actor, Event, Fair, Role,
                          Comment, EventComment, Application, EventApplication)
 
 # -----------------------------------------------------------------------------
-# address book
+# inline admins
 
 class ContactInline (admin.StackedInline):
     extra = 0
@@ -39,6 +39,16 @@ class MemberInline (admin.TabularInline):
     extra = 3
 
 
+class GroupInline (admin.TabularInline):
+    model = Group
+    extra = 3
+
+
+class RoleInline (admin.TabularInline):
+    model = Role
+    raw_id_fields = ['group']
+
+
 class RecordAdmin (admin.ModelAdmin):
     list_filter = ['status']
     date_hierarchy = 'created'
@@ -48,7 +58,8 @@ class RecordAdmin (admin.ModelAdmin):
 class PersonAdmin (RecordAdmin):
     list_per_page = 50
     search_fields = ['first_name', 'middle_name', 'last_name', 'nickname']
-    list_display = ['first_name', 'last_name'] + RecordAdmin.list_display
+    list_display = ['first_name', 'last_name', 'current_groups'] \
+                   + RecordAdmin.list_display
     fieldsets = [(None,
                   {'fields': ('title',
                               ('first_name', 'last_name'),
@@ -59,7 +70,7 @@ class PersonAdmin (RecordAdmin):
                    'fields': ('alter', )})]
     radio_fields = {'title': admin.HORIZONTAL}
     filter_horizontal = ['alter']
-    inlines = [PersonContactInline]
+    inlines = [PersonContactInline, RoleInline]
 
 
 class OrganisationAdmin (RecordAdmin):
@@ -84,16 +95,6 @@ class MemberAdmin (RecordAdmin):
 # -----------------------------------------------------------------------------
 # management
 
-class GroupInline (admin.TabularInline):
-    model = Group
-    extra = 3
-
-
-class RoleInline (admin.TabularInline):
-    model = Role
-    raw_id_fields = ['group']
-
-
 class GroupAdmin (admin.ModelAdmin):
     list_display = ['__unicode__', 'description']
     search_fields = ['name', 'fair__date']
@@ -105,12 +106,12 @@ class FairAdmin (admin.ModelAdmin):
     ordering = ('-date', )
 
 
-class ParticipantAdmin (RecordAdmin):
+class PlayerAdmin (RecordAdmin):
     search_fields = ['person__first_name', 'person__middle_name',
-                     'person__last_name', 'person__nickname']
-    list_display = ['person', 'current_groups'] + RecordAdmin.list_display
+                     'person__last_name', 'person__nickname',
+                     'user__username']
+    list_display = ['person'] + RecordAdmin.list_display
     list_per_page = 30
-    inlines = [RoleInline]
 
 
 class EventAdmin (RecordAdmin):
@@ -124,15 +125,15 @@ class EventAdmin (RecordAdmin):
 
 
 class ActorAdmin (RecordAdmin):
-    search_fields = ['event__name', 'participant__person__first_name',
-                     'participant__person__middle_name',
-                     'participant__person__last_name',
-                     'participant__person__nickname']
+    search_fields = ['event__name', 'person__first_name',
+                     'person__middle_name',
+                     'person__last_name',
+                     'person__nickname']
     list_display = ['date', '__unicode__'] + RecordAdmin.list_display
     list_display_links = ['date', '__unicode__']
     list_per_page = 30
     ordering = ('-event__date', )
-    raw_id_fields = ['event', 'participant']
+    raw_id_fields = ['event', 'person']
 
 
 class CommentAdmin (RecordAdmin):
@@ -147,9 +148,9 @@ class EventCommentAdmin (CommentAdmin):
 
 
 class ApplicationAdmin (admin.ModelAdmin):
-    raw_id_fields = ['participant']
+    raw_id_fields = ['person']
 
 
 class EventApplicationAdmin (ApplicationAdmin):
-    list_display = ['participant', 'event'] + RecordAdmin.list_display
+    list_display = ['person', 'event'] + RecordAdmin.list_display
     raw_id_fields = ApplicationAdmin.raw_id_fields + ['event']

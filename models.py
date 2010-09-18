@@ -14,12 +14,13 @@ def get_user_email (u):
     if u.email:
         return u.email
     else:
-        part = Participant.objects.get (user = u)
-        p = part.person
+        player = Player.objects.get (user = u)
+        p = player.person
         contacts = PersonContact.objects.filter (person = p)
         for c in contacts:
             if c.email:
                 return c.email
+    return None
 
 class Record (models.Model):
     NEW = 0
@@ -93,6 +94,18 @@ class Person (Record):
             return self.personcontact_set.all ()[0]
         else:
             return None
+
+    def current_groups (self):
+        groups_str = ''
+        if self.group_set:
+            groups = self.group_set.filter (Q (fair__current = True)
+                                            | Q (fair__isnull = True))
+            for g in groups:
+                if groups_str:
+                    groups_str += ', '
+                groups_str += g.name
+
+        return groups_str
 
     class Meta:
         ordering = ['first_name', 'last_name']
@@ -267,24 +280,12 @@ class Fair (models.Model):
         ordering = ['-date']
 
 
-class Participant (Record):
-    person = OneToOneField (Person, blank = False, null = False)
-    user = OneToOneField (User, blank = True, null = True)
+class Player (Record):
+    person = OneToOneField (Person)
+    user = OneToOneField (User)
 
     def __unicode__ (self):
         return self.person.__unicode__ ()
-
-    def current_groups (self):
-        groups_str = ''
-        if self.group_set:
-            groups = self.group_set.filter (Q (fair__current = True)
-                                            | Q (fair__isnull = True))
-            for g in groups:
-                if groups_str:
-                    groups_str += ', '
-                groups_str += g.name
-
-        return groups_str
 
     class Meta:
         ordering = ['person__first_name', 'person__last_name']
@@ -293,7 +294,7 @@ class Participant (Record):
 class Item (Record):
     name = CharField (max_length = 63)
     description = TextField (blank = True)
-    owner = ForeignKey (Participant)
+    owner = ForeignKey (Person)
     fair = ForeignKey (Fair, blank = True, null = True)
 
     def __unicode__ (self):
@@ -304,7 +305,7 @@ class Item (Record):
 
 
 class Event (Item):
-    team = ManyToManyField (Participant, related_name = 'event_team',
+    team = ManyToManyField (Person, related_name = 'event_team',
                             through = 'Actor')
     date = DateField ()
     time = TimeField (blank = True, null = True, verbose_name = "start time")
@@ -327,12 +328,12 @@ class Event (Item):
 
 
 class Actor (Record):
-    participant = ForeignKey (Participant)
+    person = ForeignKey (Person)
     event = ForeignKey (Event, related_name = 'event_actor')
     role = CharField (max_length = 127, blank = True)
 
     def __unicode__ (self):
-        title = self.participant.person.__unicode__ ()
+        title = self.person.__unicode__ ()
 
         if self.role:
             title += ', ' + self.role
@@ -347,7 +348,7 @@ class Group (models.Model):
     name = CharField (max_length = 31, blank = False, null = False)
     fair = ForeignKey (Fair, blank = True, null = True)
     description = CharField (max_length = 255, blank = True)
-    members = ManyToManyField (Participant, through = 'Role')
+    members = ManyToManyField (Person, through = 'Role')
 
     def __unicode__ (self):
         if self.fair:
@@ -361,7 +362,7 @@ class Group (models.Model):
 
 
 class Role (models.Model):
-    participant = ForeignKey (Participant)
+    person = ForeignKey (Person)
     group = ForeignKey (Group)
     role = CharField (max_length = 63, blank = True)
 
@@ -370,14 +371,14 @@ class Role (models.Model):
 
 
 class Comment (Record):
-    author = ForeignKey (Participant)
+    author = ForeignKey (Player)
     text = TextField ()
 
     def __unicode__ (self):
         try:
-            p = Participant.objects.get (user = self.author)
+            p = Player.objects.get (user = self.author)
             name = p.person.__unicode__ ()
-        except Participant.DoesNotExist:
+        except Player.DoesNotExist:
             name = self.author.__unicode__ ()
 
         return get_first_words (self.text)
@@ -399,7 +400,7 @@ class Application (models.Model):
                (ACCEPTED, 'Accepted'),
                (REJECTED, 'Rejected'))
 
-    participant = ForeignKey (Participant, related_name = 'appli_part')
+    person = ForeignKey (Person, related_name = 'appli_person')
     status = PositiveSmallIntegerField (choices = xstatus, default = PENDING)
     created = DateTimeField (auto_now_add = True)
 
@@ -411,4 +412,4 @@ class EventApplication (Application):
     event = ForeignKey (Event)
 
     def __unicode__ (self):
-        return "%s for %s" % (self.participant, self.event)
+        return "%s for %s" % (self.person, self.event)
