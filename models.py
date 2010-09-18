@@ -60,9 +60,9 @@ class Person (Record):
 
     title = PositiveSmallIntegerField (choices = titles, blank = True,
                                        null = True)
-    first_name = CharField (max_length = 127, blank = True)
+    first_name = CharField (max_length = 127)
     middle_name = CharField (max_length = 31, blank = True)
-    last_name = CharField (max_length = 127, blank = True)
+    last_name = CharField (max_length = 127)
     nickname = CharField (max_length = 31, blank = True)
     alter = ManyToManyField ('self', blank = True, null = True, help_text =
                              "People who can be contacted instead.")
