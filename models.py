@@ -174,7 +174,7 @@ class Contact (Record):
     email_help_text = "A valid e-mail looks like myself@whatever.com"
     website_help_text = "A valid URL looks like http://site.com"
 
-    object = ForeignKey (Contactable)
+    object = ForeignKey (Contactable, editable = False)
     line_1 = CharField (max_length = 63, blank = True)
     line_2 = CharField (max_length = 63, blank = True)
     line_3 = CharField (max_length = 63, blank = True)
