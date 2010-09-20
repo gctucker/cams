@@ -42,7 +42,29 @@ class Record (models.Model):
 # -----------------------------------------------------------------------------
 # address book
 
-class Person (Record):
+class Contactable (Record):
+    PERSON = 0
+    ORGANISATION = 1
+    MEMBER = 2
+
+    xtype = ((PERSON, 'person'), (ORGANISATION, 'organisation'),
+             (MEMBER, 'member'))
+
+    type = PositiveSmallIntegerField (choices = xtype, editable = False)
+
+    # ToDo: create special tag instead ?
+    @property
+    def contact (self):
+        if self.contact_set.count ():
+            return self.contact_set.all ()[0]
+        else:
+            return None
+
+    class Meta:
+        db_table = 'cams_abook_contactable'
+
+
+class Person (Contactable):
     MR = 0
     MISS = 1
     MS = 2
@@ -77,6 +99,10 @@ class Person (Record):
             name += ' (' + self.nickname + ')'
         return name
 
+    def save (self, *args, **kwargs):
+        self.type = Contactable.PERSON
+        super (Contactable, self).save (args, kwargs)
+
     def title_str (self):
         if self.title != None:
             return Person.titles[self.title][1]
@@ -86,14 +112,6 @@ class Person (Record):
 #    ToDo: create a proxy model and add this in the 'extra' app
 #    def get_absolute_url (self):
 #        return URL_PREFIX + "abook/person/%i" % self.id
-
-    # ToDo: create special tag instead ?
-    @property
-    def contact (self):
-        if self.personcontact_set.count ():
-            return self.personcontact_set.all ()[0]
-        else:
-            return None
 
     def current_groups (self):
         groups_str = ''
@@ -113,7 +131,7 @@ class Person (Record):
         db_table = 'cams_abook_person'
 
 
-class Organisation (Record):
+class Organisation (Contactable):
     name = CharField (max_length = 127, unique = True)
     nickname = CharField (max_length = 31, blank = True)
     members = ManyToManyField (Person, through = 'Member')
@@ -121,37 +139,31 @@ class Organisation (Record):
     def __unicode__ (self):
         return self.name
 
+    def save (self, *args, **kwargs):
+        self.type = Contactable.ORGANISATION
+        super (Contactable, self).save (args, kwargs)
+
 #    def get_absolute_url (self):
 #        return URL_PREFIX + "abook/org/%i" % self.id
-
-    @property
-    def contact (self):
-        if self.organisationcontact_set.count ():
-            return self.organisationcontact_set.all ()[0]
-        else:
-            return None
 
     class Meta:
         ordering = ['name']
         db_table = 'cams_abook_organisation'
 
 
-class Member (Record):
+class Member (Contactable):
     title = CharField (max_length = 63, blank = True, help_text =
                        "Role of that person within the organisation.")
-    organisation = ForeignKey (Organisation)
+    organisation = ForeignKey ('Organisation', related_name = 'member_org')
     person = ForeignKey (Person)
 
     def __unicode__ (self):
         return (self.person.__unicode__ () + ", member of " +
                 self.organisation.__unicode__ ())
 
-    @property
-    def contact (self):
-        if self.membercontact_set.count ():
-            return self.membercontact_set.all ()[0]
-        else:
-            return None
+    def save (self, *args, **kwargs):
+        self.type = Contactable.MEMBER
+        super (Contactable, self).save (args, kwargs)
 
     class Meta:
         unique_together = (('organisation', 'person'))
@@ -162,6 +174,7 @@ class Contact (Record):
     email_help_text = "A valid e-mail looks like myself@whatever.com"
     website_help_text = "A valid URL looks like http://site.com"
 
+    object = ForeignKey (Contactable)
     line_1 = CharField (max_length = 63, blank = True)
     line_2 = CharField (max_length = 63, blank = True)
     line_3 = CharField (max_length = 63, blank = True)
@@ -214,28 +227,7 @@ class Contact (Record):
         return contact
 
     class Meta:
-        abstract = True
-
-
-class PersonContact (Contact):
-    person = ForeignKey (Person)
-
-    class Meta:
-        db_table = 'cams_abook_p_contact'
-
-
-class OrganisationContact (Contact):
-    org = ForeignKey (Organisation)
-
-    class Meta:
-        db_table = 'cams_abook_o_contact'
-
-
-class MemberContact (Contact):
-    member = ForeignKey (Member)
-
-    class Meta:
-        db_table = 'cams_abook_m_contact'
+        db_table = 'cams_abook_contact'
 
 # -----------------------------------------------------------------------------
 # management

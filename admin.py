@@ -1,6 +1,5 @@
 from django.contrib import admin
-from cams.models import (Person, Organisation, Member,
-                         PersonContact, OrganisationContact, MemberContact,
+from cams.models import (Person, Organisation, Member, Contact,
                          Player, Group, Actor, Event, Fair, Role,
                          Comment, EventComment, Application, EventApplication)
 
@@ -9,6 +8,7 @@ from cams.models import (Person, Organisation, Member,
 
 class ContactInline (admin.StackedInline):
     extra = 0
+    model = Contact
     fieldsets = [('Address',
                   {'fields': ('line_1', 'line_2', 'line_3',
                               ('town', 'postcode'))}),
@@ -19,21 +19,13 @@ class ContactInline (admin.StackedInline):
                   {'fields': (('addr_order', 'addr_suborder'), )})]
 
 
-class PersonContactInline (ContactInline):
-    model = PersonContact
-
-
-class OrgContactInline (ContactInline):
-    model = OrganisationContact
-
-
 class MemberContactInline (ContactInline):
-    model = MemberContact
     max_num = 1
 
 
 class MemberInline (admin.TabularInline):
     model = Organisation.members.through
+    fk_name = 'organisation'
     fields = ['person', 'title']
     raw_id_fields = ['person']
     extra = 3
@@ -55,7 +47,11 @@ class RecordAdmin (admin.ModelAdmin):
     list_display = ['created', 'status']
 
 
-class PersonAdmin (RecordAdmin):
+class ContactableAdmin (RecordAdmin):
+    inlines = [ContactInline]
+
+
+class PersonAdmin (ContactableAdmin):
     list_per_page = 50
     search_fields = ['first_name', 'middle_name', 'last_name', 'nickname']
     list_display = ['first_name', 'last_name', 'current_groups'] \
@@ -70,18 +66,18 @@ class PersonAdmin (RecordAdmin):
                    'fields': ('alter', )})]
     radio_fields = {'title': admin.HORIZONTAL}
     filter_horizontal = ['alter']
-    inlines = [PersonContactInline, RoleInline]
+    inlines = ContactableAdmin.inlines + [RoleInline]
 
 
-class OrganisationAdmin (RecordAdmin):
+class OrganisationAdmin (ContactableAdmin):
     list_display = ['name'] + RecordAdmin.list_display
     list_per_page = 50
     search_fields = ['name', 'nickname']
     fieldsets = [(None, {'fields': (('name', 'nickname'), 'status')})]
-    inlines = [OrgContactInline, MemberInline]
+    inlines = ContactableAdmin.inlines + [MemberInline]
 
 
-class MemberAdmin (RecordAdmin):
+class MemberAdmin (ContactableAdmin):
     list_display = ['person', 'organisation', 'title'] \
                    + RecordAdmin.list_display
     ordering = ('person', )
@@ -89,7 +85,6 @@ class MemberAdmin (RecordAdmin):
     search_fields = ['person__first_name', 'person__middle_name',
                      'person__last_name', 'person__nickname',
                      'organisation__name', 'organisation__nickname']
-    inlines = [MemberContactInline]
     raw_id_fields = ['person', 'organisation']
 
 # -----------------------------------------------------------------------------
