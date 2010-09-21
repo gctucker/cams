@@ -16,7 +16,7 @@ def get_user_email (u):
     else:
         player = Player.objects.get (user = u)
         p = player.person
-        contacts = PersonContact.objects.filter (person = p)
+        contacts = Contact.objects.filter (object = p)
         for c in contacts:
             if c.email:
                 return c.email
