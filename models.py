@@ -396,6 +396,9 @@ class Application (models.Model):
     status = PositiveSmallIntegerField (choices = xstatus, default = PENDING)
     created = DateTimeField (auto_now_add = True)
 
+    def status_str (self):
+        return Application.xstatus[self.status][1]
+
     class Meta:
         abstract = True
 

@@ -144,6 +144,7 @@ class EventCommentAdmin (CommentAdmin):
 
 class ApplicationAdmin (admin.ModelAdmin):
     raw_id_fields = ['person']
+    list_filter = ['status']
 
 
 class EventApplicationAdmin (ApplicationAdmin):
