@@ -1,3 +1,7 @@
+import csv
+import datetime
+from django.http import HttpResponse
+
 CAMS_VERSION = (0, 0, 0)
 
 # -----------------------------------------------------------------------------
@@ -27,6 +31,34 @@ def get_user_pages (page_list, user):
         return page_list
     else:
         return filter_pages (page_list, Page.OPEN)
+
+# -----------------------------------------------------------------------------
+# CSV file response
+
+class CSVFileResponse:
+    def __init__ (self, fields):
+        self.resp = HttpResponse (mimetype = 'text/csv')
+        self.csv = csv.writer (self.resp)
+        self.csv.writerow (fields)
+
+    def writerow (self, values):
+        self.csv.writerow (values)
+
+    def set_file_name (self, fname, append_timestamp = True):
+        if append_timestamp:
+            now = datetime.datetime.today ()
+            f = '%s_%d-%02d-%02d:%02d-%02d-%02d.csv' % (fname,
+                now.year, now.month, now.day, now.hour, now.minute, now.second)
+        else:
+            f = '%s.csv' % fname
+
+        self.resp['Content-Disposition'] = 'attachement; filename=\"%s\"' % f
+        return f
+
+    @property
+    def response (self):
+        return self.resp
+
 
 # -----------------------------------------------------------------------------
 # Helpers
