@@ -42,7 +42,11 @@ class CSVFileResponse:
         self.csv.writerow (fields)
 
     def writerow (self, values):
-        self.csv.writerow (values)
+        values_utf8 = []
+        for v in values:
+            v = str (v)
+            values_utf8.append (v.encode ('utf-8'))
+        self.csv.writerow (values_utf8)
 
     def set_file_name (self, fname, append_timestamp = True):
         if append_timestamp:
