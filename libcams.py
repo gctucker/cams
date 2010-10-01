@@ -44,7 +44,6 @@ class CSVFileResponse:
     def writerow (self, values):
         values_utf8 = []
         for v in values:
-            v = str (v)
             values_utf8.append (v.encode ('utf-8'))
         self.csv.writerow (values_utf8)
 
