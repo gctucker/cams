@@ -36,9 +36,9 @@ def get_user_pages (page_list, user):
 # CSV file response
 
 class CSVFileResponse:
-    def __init__ (self, fields):
+    def __init__ (self, fields, **kwargs):
         self.resp = HttpResponse (mimetype = 'text/csv')
-        self.csv = csv.writer (self.resp)
+        self.csv = csv.writer (self.resp, **kwargs)
         self.csv.writerow (fields)
 
     def writerow (self, values):
