@@ -195,22 +195,7 @@ class Contact (Record):
                      "Order of the premises on side streets around Mill Road.")
 
     def __unicode__ (self):
-        contact = ''
-        if self.line_1:
-            contact = self.line_1
-            if self.line_2:
-                contact += ', ' + self.line_2
-                if self.line_3:
-                    contact += ', ' + self.line_3
-
-        if self.town:
-            if contact:
-                contact += ', '
-            contact += self.town
-        elif self.postcode:
-            if contact:
-                contact += ', '
-            contact += self.postcode
+        contact = self.get_address ()
 
         if not contact:
             if self.email:
@@ -225,6 +210,27 @@ class Contact (Record):
                 contact = '[empty contact]'
 
         return contact
+
+    def get_address (self):
+        address = ''
+
+        if self.line_1:
+            address = self.line_1
+            if self.line_2:
+                address += ', ' + self.line_2
+                if self.line_3:
+                    address += ', ' + self.line_3
+
+        if self.town:
+            if address:
+                address += ', '
+            address += self.town
+        elif self.postcode:
+            if address:
+                address += ', '
+            address += self.postcode
+
+        return address
 
     class Meta:
         db_table = 'cams_abook_contact'
