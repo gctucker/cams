@@ -408,3 +408,43 @@ class EventApplication (Application):
 
     def __unicode__ (self):
         return "%s for %s" % (self.person, self.event)
+
+
+class Invoice (models.Model):
+    NEW = 0
+    SENT = 1
+    PAID = 2
+    BANKED = 3
+
+    xstatus = ((NEW, 'New'), (SENT, 'Sent'),
+               (PAID, 'Paid'), (BANKED, 'Banked'))
+
+    status = PositiveSmallIntegerField (choices = xstatus, default = NEW)
+    amount = DecimalField (max_digits = 8, decimal_places = 2)
+    created = DateTimeField (auto_now_add = True)
+    sent = DateTimeField (null = True, blank = True)
+    paid = DateTimeField (null = True, blank = True)
+    banked = DateTimeField (null = True, blank = True)
+
+    def status_str (self):
+        return Invoice.xstatus[self.status][1]
+
+    def save (self, *args, **kwargs):
+        now = datetime.now ()
+
+        if self.status > Invoice.NEW:
+            if not self.sent:
+                self.sent = now
+
+            if self.status > Invoice.SENT:
+                if not self.paid:
+                    self.paid = now
+
+                if self.status > Invoice.PAID:
+                    if not self.banked:
+                        self.banked = now
+
+        super (Invoice, self).save (args, kwargs)
+
+    class Meta:
+        abstract = True

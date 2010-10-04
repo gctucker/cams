@@ -1,7 +1,8 @@
 from django.contrib import admin
 from cams.models import (Person, Organisation, Member, Contact,
                          Player, Group, Actor, Event, Fair, Role,
-                         Comment, EventComment, Application, EventApplication)
+                         Comment, EventComment, Application, EventApplication,
+                         Invoice)
 
 # -----------------------------------------------------------------------------
 # inline admins
@@ -150,3 +151,9 @@ class ApplicationAdmin (admin.ModelAdmin):
 class EventApplicationAdmin (ApplicationAdmin):
     list_display = ['person', 'event'] + RecordAdmin.list_display
     raw_id_fields = ApplicationAdmin.raw_id_fields + ['event']
+
+
+class InvoiceAdmin (admin.ModelAdmin):
+    list_display = ['__unicode__', 'amount', 'status', 'created', 'sent',
+                    'paid', 'banked']
+    exclude = ['sent', 'paid', 'banked']
