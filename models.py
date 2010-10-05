@@ -324,6 +324,9 @@ class Event (Item):
 
         return str (when)
 
+    class Meta:
+        ordering = ['name']
+
 
 class Actor (Record):
     person = ForeignKey (Person)
