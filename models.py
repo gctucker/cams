@@ -449,6 +449,15 @@ class Invoice (models.Model):
                 if self.status > Invoice.PAID:
                     if not self.banked:
                         self.banked = now
+                else:
+                    self.banked = None
+            else:
+                self.paid = None
+                self.banked = None
+        else:
+            self.sent = None
+            self.paid = None
+            self.banked = None
 
         super (Invoice, self).save (args, kwargs)
 
