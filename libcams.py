@@ -50,7 +50,7 @@ class CSVFileResponse:
     def set_file_name (self, fname, append_timestamp = True):
         if append_timestamp:
             now = datetime.datetime.today ()
-            f = '%s_%d-%02d-%02d:%02d-%02d-%02d.csv' % (fname,
+            f = '%s_%d-%02d-%02d_%02d:%02d:%02d.csv' % (fname,
                 now.year, now.month, now.day, now.hour, now.minute, now.second)
         else:
             f = '%s.csv' % fname
