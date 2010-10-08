@@ -47,16 +47,8 @@ class CSVFileResponse:
             values_utf8.append (v.encode ('utf-8'))
         self.csv.writerow (values_utf8)
 
-    def set_file_name (self, fname, append_timestamp = True):
-        if append_timestamp:
-            now = datetime.datetime.today ()
-            f = '%s_%d-%02d-%02d_%02d:%02d:%02d.csv' % (fname,
-                now.year, now.month, now.day, now.hour, now.minute, now.second)
-        else:
-            f = '%s.csv' % fname
-
+    def set_file_name (self, f):
         self.resp['Content-Disposition'] = 'attachement; filename=\"%s\"' % f
-        return f
 
     @property
     def response (self):
@@ -90,3 +82,8 @@ def str2list (match, sep = ' '):
             ret.append (word)
 
     return ret
+
+def get_time_string ():
+    now = datetime.datetime.today ()
+    return '%d-%02d-%02d_%02d:%02d:%02d' % \
+        (now.year, now.month, now.day, now.hour, now.minute, now.second)
