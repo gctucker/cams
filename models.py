@@ -429,6 +429,7 @@ class Invoice (models.Model):
                (PAID, 'Paid'), (BANKED, 'Banked'))
 
     status = PositiveSmallIntegerField (choices = xstatus, default = NEW)
+    reference = CharField (max_length = 63, blank = True)
     amount = DecimalField (max_digits = 8, decimal_places = 2)
     created = DateTimeField (auto_now_add = True)
     sent = DateTimeField (null = True, blank = True)
