@@ -225,7 +225,8 @@ class Contact (Record):
             if address:
                 address += ', '
             address += self.town
-        elif self.postcode:
+
+        if self.postcode:
             if address:
                 address += ', '
             address += self.postcode
