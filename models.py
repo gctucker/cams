@@ -8,7 +8,7 @@ from django.db.models import (CharField, TextField, EmailField, URLField,
                               ForeignKey, OneToOneField, ManyToManyField)
 from django.db.models.query import Q
 from django.contrib.auth.models import User
-from libcams import get_first_words
+from libcams import get_first_words, get_obj_address
 
 def get_user_email (u):
     if u.email:
@@ -195,7 +195,7 @@ class Contact (Record):
                      "Order of the premises on side streets around Mill Road.")
 
     def __unicode__ (self):
-        contact = self.get_address ()
+        contact = get_obj_address (self)
 
         if not contact:
             if self.email:
@@ -212,26 +212,7 @@ class Contact (Record):
         return contact
 
     def get_address (self):
-        address = ''
-
-        if self.line_1:
-            address = self.line_1
-            if self.line_2:
-                address += ', ' + self.line_2
-                if self.line_3:
-                    address += ', ' + self.line_3
-
-        if self.town:
-            if address:
-                address += ', '
-            address += self.town
-
-        if self.postcode:
-            if address:
-                address += ', '
-            address += self.postcode
-
-        return address
+        return get_obj_address (self)
 
     class Meta:
         db_table = 'cams_abook_contact'

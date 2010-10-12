@@ -87,3 +87,26 @@ def get_time_string ():
     now = datetime.datetime.today ()
     return '%d-%02d-%02d_%02d:%02d:%02d' % \
         (now.year, now.month, now.day, now.hour, now.minute, now.second)
+
+def get_obj_address (obj):
+    address = ''
+
+    if obj.line_1:
+        address = obj.line_1
+        if obj.line_2:
+            address += ', ' + obj.line_2
+            if obj.line_3:
+                address += ', ' + obj.line_3
+
+    if obj.town:
+        if address:
+            address += ', '
+        address += obj.town
+
+    if obj.postcode:
+        if address:
+            address += ', '
+        address += obj.postcode
+
+    return address
+
