@@ -52,6 +52,18 @@ class Contactable (Record):
 
     type = PositiveSmallIntegerField (choices = xtype, editable = False)
 
+    def current_groups (self):
+        groups_str = ''
+        if self.group_set:
+            groups = self.group_set.filter (Q (fair__current = True)
+                                            | Q (fair__isnull = True))
+            for g in groups:
+                if groups_str:
+                    groups_str += ', '
+                groups_str += g.name
+
+        return groups_str
+
     # ToDo: create special tag instead ?
     @property
     def contact (self):
@@ -59,6 +71,10 @@ class Contactable (Record):
             return self.contact_set.all ()[0]
         else:
             return None
+
+    @property
+    def type_str (self):
+        return Contactable.xtype[self.type][1]
 
     class Meta:
         db_table = 'cams_abook_contactable'
@@ -112,18 +128,6 @@ class Person (Contactable):
 #    ToDo: create a proxy model and add this in the 'extra' app
 #    def get_absolute_url (self):
 #        return URL_PREFIX + "abook/person/%i" % self.id
-
-    def current_groups (self):
-        groups_str = ''
-        if self.group_set:
-            groups = self.group_set.filter (Q (fair__current = True)
-                                            | Q (fair__isnull = True))
-            for g in groups:
-                if groups_str:
-                    groups_str += ', '
-                groups_str += g.name
-
-        return groups_str
 
     class Meta:
         ordering = ['first_name', 'last_name']
@@ -331,7 +335,7 @@ class Group (models.Model):
     name = CharField (max_length = 31, blank = False, null = False)
     fair = ForeignKey (Fair, blank = True, null = True)
     description = CharField (max_length = 255, blank = True)
-    members = ManyToManyField (Person, through = 'Role')
+    members = ManyToManyField (Contactable, through = 'Role')
 
     def __unicode__ (self):
         if self.fair:
@@ -345,7 +349,7 @@ class Group (models.Model):
 
 
 class Role (models.Model):
-    person = ForeignKey (Person)
+    contactable = ForeignKey (Contactable)
     group = ForeignKey (Group)
     role = CharField (max_length = 63, blank = True)
 
