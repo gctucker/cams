@@ -71,11 +71,11 @@ class PersonAdmin (ContactableAdmin):
 
 
 class OrganisationAdmin (ContactableAdmin):
-    list_display = ['name'] + RecordAdmin.list_display
+    list_display = ['name', 'current_groups'] + RecordAdmin.list_display
     list_per_page = 50
     search_fields = ['name', 'nickname']
     fieldsets = [(None, {'fields': (('name', 'nickname'), 'status')})]
-    inlines = ContactableAdmin.inlines + [MemberInline]
+    inlines = ContactableAdmin.inlines + [RoleInline, MemberInline]
 
 
 class MemberAdmin (ContactableAdmin):
