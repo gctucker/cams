@@ -2,7 +2,7 @@ import csv
 import datetime
 from django.http import HttpResponse
 
-CAMS_VERSION = (0, 0, 0)
+CAMS_VERSION = (0, 1, 0)
 
 # -----------------------------------------------------------------------------
 # Page system
