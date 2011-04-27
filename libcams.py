@@ -7,59 +7,60 @@ CAMS_VERSION = (0, 1, 0)
 # -----------------------------------------------------------------------------
 # Page system
 
-class Page ():
-    OPEN = 0
+class Page(object):
+    COMMON = 0
     ADMIN = 1
 
-    def __init__ (self, name, url, title, group):
+    def __init__(self, name, url, title, group):
         self.name = name
         self.url = url
         self.title = title
         self.group = group
 
-def filter_pages (page_list, group):
+def filter_pages(page_list, group):
     filtered = []
 
     for p in page_list:
         if p.group == group:
-            filtered.append (p)
+            filtered.append(p)
 
     return filtered
 
-def get_user_pages (page_list, user):
+def get_user_pages(page_list, user):
     if user.is_staff:
         return page_list
     else:
-        return filter_pages (page_list, Page.OPEN)
+        return filter_pages(page_list, Page.COMMON)
 
 # -----------------------------------------------------------------------------
 # CSV file response
 
-class CSVFileResponse:
-    def __init__ (self, fields, **kwargs):
-        self.resp = HttpResponse (mimetype = 'text/csv')
-        self.csv = csv.writer (self.resp, **kwargs)
-        self.csv.writerow (fields)
+class CSVFileResponse(object):
+    def __init__(self, fields, **kwargs):
+        self._resp = HttpResponse(mimetype = 'text/csv')
+        self._csv = csv.writer(self._resp, **kwargs)
+        self._csv.writerow(fields)
 
-    def writerow (self, values):
+    def write(self, values):
         values_utf8 = []
         for v in values:
-            values_utf8.append (v.encode ('utf-8'))
-        self.csv.writerow (values_utf8)
+            values_utf8.append(v.encode('utf-8'))
+        self._csv.writerow(values_utf8)
 
-    def set_file_name (self, f):
-        self.resp['Content-Disposition'] = 'attachement; filename=\"%s\"' % f
+    def set_file_name(self, f):
+        self._resp['Content-Disposition'] = \
+            'attachement; filename=\"{:s}\"'.format(f)
 
     @property
-    def response (self):
-        return self.resp
+    def response(self):
+        return self._resp
 
 
 # -----------------------------------------------------------------------------
 # Helpers
 
-def get_first_words (text, max_l = 24):
-    if len (text) <= max_l:
+def get_first_words(text, max_l=24):
+    if len(text) <= max_l:
         return text
 
     i = 0
@@ -67,28 +68,30 @@ def get_first_words (text, max_l = 24):
 
     while (i < max_l) and (j >= 0):
         i = j
-        j = text.find (' ', i + 1, max_l)
+        j = text.find(' ', i + 1, max_l)
 
     return text[:i] + "..."
 
-def str2list (match, sep = ' '):
-    match = match.strip ()
-    words = match.split (sep)
+def str2list(match, sep=' '):
+    match = match.strip()
+    words = match.split(sep)
     ret = []
 
     for word in words:
-        word.strip ()
+        word.strip()
         if word:
-            ret.append (word)
+            ret.append(word)
 
     return ret
 
-def get_time_string ():
-    now = datetime.datetime.today ()
-    return '%d-%02d-%02d_%02d:%02d:%02d' % \
+def get_time_string():
+    now = datetime.datetime.today()
+    return '{:d}-{:02d}-{:02d}_{:02d}:{:02d}:{:2d}'.format \
         (now.year, now.month, now.day, now.hour, now.minute, now.second)
 
-def get_obj_address (obj):
+# ToDo: that should really go away eventually
+# (class methods in the models should be able to do that in a nicer way)
+def get_obj_address(obj):
     address = ''
 
     if obj.line_1:
@@ -109,4 +112,3 @@ def get_obj_address (obj):
         address += obj.postcode
 
     return address
-
