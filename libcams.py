@@ -2,42 +2,55 @@ import csv
 import datetime
 from django.http import HttpResponse
 
-CAMS_VERSION = (0, 1, 0)
+CAMS_VERSION = (0, 2, 0)
 
 # -----------------------------------------------------------------------------
-# Page system
+# Main menu
 
-class Page(object):
-    COMMON = 0
-    ADMIN = 1
+class Menu(object):
+    def __init__(self, items):
+        self.items = items
 
-    def __init__(self, name, url, title, group):
-        self.name = name
-        self.url = url
-        self.title = title
-        self.group = group
+    def set_current(self, name):
+        for it in self.items:
+            if it.name == name:
+                it.current = True
+            else:
+                it.current = False
 
-def filter_pages(page_list, group):
-    filtered = []
+    def get_group_pages(self, page_list, group):
+        filtered = []
 
-    for p in page_list:
-        if p.group == group:
-            filtered.append(p)
+        for p in self.page_list:
+            if p.group == group:
+                filtered.append(p)
 
-    return filtered
+        return filtered
 
-def get_user_pages(page_list, user):
-    if user.is_staff:
-        return page_list
-    else:
-        return filter_pages(page_list, Page.COMMON)
+    def get_user_pages(self, user):
+        if user.is_staff:
+            return self.items
+        else:
+            return self.get_group_pages(Page.COMMON)
+
+    class Item(object):
+        COMMON = 0
+        ADMIN = 1
+
+        def __init__(self, name, url, title, group, current=False):
+            self.name = name
+            self.url = url
+            self.title = title
+            self.group = group
+            self.current = current
+
 
 # -----------------------------------------------------------------------------
 # CSV file response
 
 class CSVFileResponse(object):
     def __init__(self, fields, **kwargs):
-        self._resp = HttpResponse(mimetype = 'text/csv')
+        self._resp = HttpResponse(mimetype='text/csv')
         self._csv = csv.writer(self._resp, **kwargs)
         self._csv.writerow(fields)
 
@@ -70,7 +83,7 @@ def get_first_words(text, max_l=24):
         i = j
         j = text.find(' ', i + 1, max_l)
 
-    return text[:i] + "..."
+    return text[:i] + '...'
 
 def str2list(match, sep=' '):
     match = match.strip()
