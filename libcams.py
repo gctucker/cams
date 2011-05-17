@@ -54,7 +54,6 @@ class CSVFileResponse:
     def response (self):
         return self.resp
 
-
 # -----------------------------------------------------------------------------
 # Helpers
 
@@ -110,3 +109,11 @@ def get_obj_address (obj):
 
     return address
 
+def make_group_file_name (group, sx = ''):
+    if group.fair:
+        year_str = '-%d' % group.fair.date.year
+    else:
+        year_str = ''
+
+    return '%s%s%s_%s' % (group.name.replace (' ', '_'),
+                          year_str, sx, get_time_string ())
