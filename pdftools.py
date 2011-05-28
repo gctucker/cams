@@ -1,24 +1,26 @@
+from copy import deepcopy
 from cams.models import (Record, Contactable, Contact, Person, Organisation,
                          Member)
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
-from reportlab.lib.pagesizes import A5
 from reportlab.platypus import (SimpleDocTemplate, Paragraph, Table,
-                                TableStyle, PageBreak, Spacer)
-from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+                                TableStyle, Spacer)
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.enums import TA_LEFT
 from reportlab.lib import colors
 
-def append_org_page(org, flow, page_size=A5):
+def append_org_form(org, flow, page_size):
     styles = getSampleStyleSheet()
     width, height = page_size
     border = inch/2
     w = width - 2*border
+    space = inch/4
 
-    title_style = styles["Normal"]
+    title_style = deepcopy(styles["Normal"])
     title_style.fontSize = 13
     title = Paragraph(org.name, title_style)
     flow.append(title)
-    flow.append(Spacer(0, inch/4))
+    flow.append(Spacer(0, space))
 
     c = Contact.objects.filter(obj=org)
     if len(c) == 0:
@@ -62,6 +64,12 @@ def append_org_page(org, flow, page_size=A5):
     m_data = (('Name', 'Telephone', 'E-mail'), )
     widths = (w*0.30, w*0.25, w*0.45)
 
+    txt_style = deepcopy(styles["Normal"])
+    txt_style.fontSize = 10
+    txt_style.alignment = TA_LEFT
+    flow.append(Spacer(0, space))
+    flow.append(Paragraph('List of people who can be contacted:', txt_style))
+
     members = Member.objects.filter(organisation=org)
     for m in members[:10]:
         c = Contact.objects.filter(obj=m)
@@ -82,7 +90,5 @@ def append_org_page(org, flow, page_size=A5):
         m_data += (('', '', ''), )
 
     table = Table(m_data, style=BOX_STYLE, colWidths=widths)
-    flow.append(Spacer(0, inch/4))
+    flow.append(Spacer(0, space))
     flow.append(table)
-
-    flow.append(PageBreak())
