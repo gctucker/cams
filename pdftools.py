@@ -58,7 +58,7 @@ def append_org_form(org, flow, page_size):
 
     BOX_STYLE = TableStyle(
         [('LINEBELOW', (0, 0), (-1, 0), 1.0, colors.black),
-         ('ALIGNMENT', (0, 0), (-1, 0), 'CENTRE'),
+         ('ALIGNMENT', (0, 0), (-1, -1), 'CENTRE'),
          ('LINEBELOW', (0, 1), (-1, -1), 0.25, colors.black),
          ])
     m_data = (('Name', 'Telephone', 'E-mail'), )
