@@ -14,13 +14,13 @@ def append_org_form(org, flow, page_size):
     width, height = page_size
     border = inch/2
     w = width - 2*border
-    space = inch/4
+    spacer = Spacer(0, inch/4)
 
     title_style = deepcopy(styles["Normal"])
     title_style.fontSize = 13
     title = Paragraph(org.name, title_style)
     flow.append(title)
-    flow.append(Spacer(0, space))
+    flow.append(spacer)
 
     c = Contact.objects.filter(obj=org)
     if len(c) == 0:
@@ -67,7 +67,7 @@ def append_org_form(org, flow, page_size):
     txt_style = deepcopy(styles["Normal"])
     txt_style.fontSize = 10
     txt_style.alignment = TA_LEFT
-    flow.append(Spacer(0, space))
+    flow.append(spacer)
     flow.append(Paragraph('List of people who can be contacted:', txt_style))
 
     members = Member.objects.filter(organisation=org)
@@ -90,5 +90,5 @@ def append_org_form(org, flow, page_size):
         m_data += (('', '', ''), )
 
     table = Table(m_data, style=BOX_STYLE, colWidths=widths)
-    flow.append(Spacer(0, space))
+    flow.append(spacer)
     flow.append(table)
