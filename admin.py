@@ -7,7 +7,7 @@ from cams.models import (Person, Organisation, Member, Contact,
 # -----------------------------------------------------------------------------
 # inline admins
 
-class ContactInline (admin.StackedInline):
+class ContactInline(admin.StackedInline):
     extra = 0
     model = Contact
     fieldsets = [('Address',
@@ -20,11 +20,11 @@ class ContactInline (admin.StackedInline):
                   {'fields': (('addr_order', 'addr_suborder'), )})]
 
 
-class MemberContactInline (ContactInline):
+class MemberContactInline(ContactInline):
     max_num = 1
 
 
-class MemberInline (admin.TabularInline):
+class MemberInline(admin.TabularInline):
     model = Organisation.members.through
     fk_name = 'organisation'
     fields = ['person', 'title']
@@ -32,27 +32,27 @@ class MemberInline (admin.TabularInline):
     extra = 3
 
 
-class GroupInline (admin.TabularInline):
+class GroupInline(admin.TabularInline):
     model = Group
     extra = 3
 
 
-class RoleInline (admin.TabularInline):
+class RoleInline(admin.TabularInline):
     model = Role
     raw_id_fields = ['group']
 
 
-class RecordAdmin (admin.ModelAdmin):
+class RecordAdmin(admin.ModelAdmin):
     list_filter = ['status']
     date_hierarchy = 'created'
     list_display = ['created', 'status']
 
 
-class ContactableAdmin (RecordAdmin):
+class ContactableAdmin(RecordAdmin):
     inlines = [ContactInline]
 
 
-class PersonAdmin (ContactableAdmin):
+class PersonAdmin(ContactableAdmin):
     list_per_page = 50
     search_fields = ['first_name', 'middle_name', 'last_name', 'nickname']
     list_display = ['first_name', 'last_name', 'current_groups'] \
@@ -70,7 +70,7 @@ class PersonAdmin (ContactableAdmin):
     inlines = ContactableAdmin.inlines + [RoleInline]
 
 
-class OrganisationAdmin (ContactableAdmin):
+class OrganisationAdmin(ContactableAdmin):
     list_display = ['name', 'current_groups'] + RecordAdmin.list_display
     list_per_page = 50
     search_fields = ['name', 'nickname']
@@ -78,7 +78,7 @@ class OrganisationAdmin (ContactableAdmin):
     inlines = ContactableAdmin.inlines + [RoleInline, MemberInline]
 
 
-class MemberAdmin (ContactableAdmin):
+class MemberAdmin(ContactableAdmin):
     list_display = ['person', 'organisation', 'title'] \
                    + RecordAdmin.list_display
     ordering = ('person', )
@@ -91,18 +91,18 @@ class MemberAdmin (ContactableAdmin):
 # -----------------------------------------------------------------------------
 # management
 
-class GroupAdmin (admin.ModelAdmin):
+class GroupAdmin(admin.ModelAdmin):
     list_display = ['__unicode__', 'description']
     search_fields = ['name', 'fair__date']
     list_filter = ['fair']
 
 
-class FairAdmin (admin.ModelAdmin):
+class FairAdmin(admin.ModelAdmin):
     list_display = ['date', 'description', 'current']
     ordering = ('-date', )
 
 
-class PlayerAdmin (RecordAdmin):
+class PlayerAdmin(RecordAdmin):
     search_fields = ['person__first_name', 'person__middle_name',
                      'person__last_name', 'person__nickname',
                      'user__username']
@@ -110,7 +110,7 @@ class PlayerAdmin (RecordAdmin):
     list_per_page = 30
 
 
-class EventAdmin (RecordAdmin):
+class EventAdmin(RecordAdmin):
     search_fields = ['name', 'org__name']
     list_display = ['__unicode__', 'date', 'time', 'org', 'owner'] \
                    + RecordAdmin.list_display
@@ -120,7 +120,7 @@ class EventAdmin (RecordAdmin):
     list_filter = RecordAdmin.list_filter + ['fair']
 
 
-class ActorAdmin (RecordAdmin):
+class ActorAdmin(RecordAdmin):
     search_fields = ['event__name', 'person__first_name',
                      'person__middle_name',
                      'person__last_name',
@@ -132,28 +132,28 @@ class ActorAdmin (RecordAdmin):
     raw_id_fields = ['event', 'person']
 
 
-class CommentAdmin (RecordAdmin):
+class CommentAdmin(RecordAdmin):
     list_display = ['created', 'author', '__unicode__'] \
                    + RecordAdmin.list_display
     ordering = ('-created', )
     raw_id_fields = ['author']
 
 
-class EventCommentAdmin (CommentAdmin):
+class EventCommentAdmin(CommentAdmin):
     raw_id_fields = CommentAdmin.raw_id_fields + ['event']
 
 
-class ApplicationAdmin (admin.ModelAdmin):
+class ApplicationAdmin(admin.ModelAdmin):
     raw_id_fields = ['person']
     list_filter = ['status']
 
 
-class EventApplicationAdmin (ApplicationAdmin):
+class EventApplicationAdmin(ApplicationAdmin):
     list_display = ['person', 'event'] + RecordAdmin.list_display
     raw_id_fields = ApplicationAdmin.raw_id_fields + ['event']
 
 
-class InvoiceAdmin (admin.ModelAdmin):
+class InvoiceAdmin(admin.ModelAdmin):
     list_display = ['__unicode__', 'amount', 'status', 'created', 'sent',
                     'paid', 'banked']
     exclude = ['sent', 'paid', 'banked']
