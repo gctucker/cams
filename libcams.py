@@ -2,63 +2,77 @@ import csv
 import datetime
 from django.http import HttpResponse
 
-CAMS_VERSION = (0, 0, 0)
+CAMS_VERSION = (0, 2, 0)
 
 # -----------------------------------------------------------------------------
-# Page system
+# Main menu
 
-class Page ():
-    OPEN = 0
-    ADMIN = 1
+class Menu(object):
+    def __init__(self, items):
+        self.items = items
 
-    def __init__ (self, name, url, title, group):
-        self.name = name
-        self.url = url
-        self.title = title
-        self.group = group
+    def set_current(self, name):
+        for it in self.items:
+            if it.name == name:
+                it.current = True
+            else:
+                it.current = False
 
-def filter_pages (page_list, group):
-    filtered = []
+    def get_group_pages(self, page_list, group):
+        filtered = []
 
-    for p in page_list:
-        if p.group == group:
-            filtered.append (p)
+        for p in self.page_list:
+            if p.group == group:
+                filtered.append(p)
 
-    return filtered
+        return filtered
 
-def get_user_pages (page_list, user):
-    if user.is_staff:
-        return page_list
-    else:
-        return filter_pages (page_list, Page.OPEN)
+    def get_user_pages(self, user):
+        if user.is_staff:
+            return self.items
+        else:
+            return self.get_group_pages(Page.COMMON)
+
+    class Item(object):
+        COMMON = 0
+        ADMIN = 1
+
+        def __init__(self, name, url, title, group, current=False):
+            self.name = name
+            self.url = url
+            self.title = title
+            self.group = group
+            self.current = current
+
 
 # -----------------------------------------------------------------------------
 # CSV file response
 
-class CSVFileResponse:
-    def __init__ (self, fields, **kwargs):
-        self.resp = HttpResponse (mimetype = 'text/csv')
-        self.csv = csv.writer (self.resp, **kwargs)
-        self.csv.writerow (fields)
+class CSVFileResponse(object):
+    def __init__(self, fields, **kwargs):
+        self._resp = HttpResponse(mimetype='text/csv')
+        self._csv = csv.writer(self._resp, **kwargs)
+        self._csv.writerow(fields)
 
-    def writerow (self, values):
+    def write(self, values):
         values_utf8 = []
         for v in values:
-            values_utf8.append (v.encode ('utf-8'))
-        self.csv.writerow (values_utf8)
+            values_utf8.append(v.encode('utf-8'))
+        self._csv.writerow(values_utf8)
 
-    def set_file_name (self, f):
-        self.resp['Content-Disposition'] = 'attachement; filename=\"%s\"' % f
+    def set_file_name(self, f):
+        self._resp['Content-Disposition'] = \
+            'attachement; filename=\"{:s}\"'.format(f)
 
     @property
-    def response (self):
-        return self.resp
+    def response(self):
+        return self._resp
 
 # -----------------------------------------------------------------------------
 # Helpers
 
-def get_first_words (text, max_l = 24):
-    if len (text) <= max_l:
+def get_first_words(text, max_l=24):
+    if len(text) <= max_l:
         return text
 
     i = 0
@@ -66,28 +80,30 @@ def get_first_words (text, max_l = 24):
 
     while (i < max_l) and (j >= 0):
         i = j
-        j = text.find (' ', i + 1, max_l)
+        j = text.find(' ', i + 1, max_l)
 
-    return text[:i] + "..."
+    return text[:i] + '...'
 
-def str2list (match, sep = ' '):
-    match = match.strip ()
-    words = match.split (sep)
+def str2list(match, sep=' '):
+    match = match.strip()
+    words = match.split(sep)
     ret = []
 
     for word in words:
-        word.strip ()
+        word.strip()
         if word:
-            ret.append (word)
+            ret.append(word)
 
     return ret
 
-def get_time_string ():
-    now = datetime.datetime.today ()
-    return '%d-%02d-%02d_%02d:%02d:%02d' % \
+def get_time_string():
+    now = datetime.datetime.today()
+    return '{:d}-{:02d}-{:02d}_{:02d}:{:02d}:{:02d}'.format \
         (now.year, now.month, now.day, now.hour, now.minute, now.second)
 
-def get_obj_address (obj):
+# ToDo: that should really go away eventually
+# (class methods in the models should be able to do that in a nicer way)
+def get_obj_address(obj):
     address = ''
 
     if obj.line_1:
