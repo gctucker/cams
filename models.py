@@ -1,10 +1,9 @@
 from datetime import datetime, date
 from django.db import models
 from django.db.models import (CharField, TextField, EmailField, URLField,
-                              IntegerField, PositiveIntegerField, BooleanField,
+                              IntegerField, BooleanField,
                               PositiveSmallIntegerField, DecimalField,
                               DateField, TimeField, DateTimeField,
-                              ImageField,
                               ForeignKey, OneToOneField, ManyToManyField)
 from django.db.models.query import Q
 from django.contrib.auth.models import User
