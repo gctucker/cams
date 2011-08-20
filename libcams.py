@@ -18,7 +18,7 @@ class Menu(object):
             else:
                 it.current = False
 
-    def get_group_pages(self, page_list, group):
+    def get_group_entries(self, page_list, group):
         filtered = []
 
         for p in self.page_list:
@@ -27,11 +27,11 @@ class Menu(object):
 
         return filtered
 
-    def get_user_pages(self, user):
+    def get_user_entries(self, user):
         if user.is_staff:
             return self.items
         else:
-            return self.get_group_pages(Page.COMMON)
+            return self.get_group_entries(Page.COMMON)
 
     class Item(object):
         COMMON = 0
