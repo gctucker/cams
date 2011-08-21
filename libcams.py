@@ -133,3 +133,11 @@ def make_group_file_name (group, sx = ''):
 
     return '%s%s%s_%s' % (group.name.replace (' ', '_'),
                           year_str, sx, get_time_string ())
+
+def get_user_email(user):
+    if user.email:
+        return user.email
+    try:
+        return user.player.person.contact_set.exclude(email='')[0].email
+    except IndexError:
+        return None
