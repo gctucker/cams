@@ -56,8 +56,8 @@ class Contactable(Record):
     def current_groups(self):
         groups_str = ''
         if self.group_set:
-            groups = self.group_set.filter(Q(fair__current = True)
-                                           | Q(fair__isnull = True))
+            groups = self.group_set.filter(Q(fair__current=True)
+                                           | Q(fair__isnull=True))
             for g in groups:
                 if groups_str:
                     groups_str += ', '
@@ -109,8 +109,11 @@ class Person(Contactable):
         name = self.first_name
         if self.middle_name:
             name += ' ' + self.middle_name
-        if self.last_name:
-            name += ' ' + self.last_name
+        return name + ' ' + self.last_name
+
+    @property
+    def name_nn(self):
+        name = self.__unicode__()
         if self.nickname:
             name += ' (' + self.nickname + ')'
         return name
@@ -142,6 +145,13 @@ class Organisation(Contactable):
 
     def __unicode__(self):
         return self.name
+
+    @property
+    def name_nn(self):
+        name = self.name
+        if self.nickname:
+            name += ' (' + self.nickname + ')'
+        return name
 
     def save(self, *args, **kwargs):
         self.type = Contactable.ORGANISATION
