@@ -25,7 +25,6 @@ class Record(models.Model):
     class Meta(object):
         abstract = True
 
-
 # -----------------------------------------------------------------------------
 # address book
 
@@ -67,6 +66,11 @@ class Contactable(Record):
 
     class Meta(object):
         db_table = 'cams_abook_contactable'
+        permissions = (
+            ('abook_edit', "Can edit address book entries"),
+            ('abook_add', "Can add address book entries"),
+            ('abook_delete', "Can delete address book entries"),
+        )
 
 
 class Person(Contactable):
@@ -309,6 +313,11 @@ class Event(Item):
 
     class Meta(object):
         ordering = ['name']
+        permissions = (
+            ('programme_edit', "Can edit the programme"),
+            ('programme_add', "Can add events to the programme"),
+            ('programme_delete', "Can delete events from the programme"),
+        )
 
 
 class Actor(Record):
@@ -344,6 +353,11 @@ class Group(models.Model):
     class Meta(object):
         unique_together = (('name', 'fair'), )
         ordering = ['name']
+        permissions = (
+            ('groups_edit', "Can edit groups"),
+            ('groups_add', "Can add groups"),
+            ('groups_delete', "Can delete groups"),
+        )
 
 
 class Role(models.Model):
@@ -451,3 +465,9 @@ class Invoice(models.Model):
 
     class Meta(object):
         abstract = True
+        permissions = (
+            ('invoices_view', "Can view invoices"),
+            ('invoices_edit', "Can edit invoices"),
+            ('invoices_add', "Can add invoices"),
+            ('invoices_delete', "Can delete invoices"),
+        )
