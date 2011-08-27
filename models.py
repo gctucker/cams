@@ -64,6 +64,15 @@ class Contactable(Record):
     def type_str(self):
         return Contactable.xtype[self.type][1]
 
+    @property
+    def subobj(self):
+        if self.type == Contactable.PERSON:
+            return self.person
+        elif self.type == Contactable.ORGANISATION:
+            return self.organisation
+        elif self.type == Contactable.MEMBER:
+            return self.member
+
     class Meta(object):
         db_table = 'cams_abook_contactable'
         permissions = (
