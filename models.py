@@ -39,6 +39,9 @@ class Contactable(Record):
     # ToDo: rename to something else as `type' is a built-in function name
     type = PositiveSmallIntegerField(choices=xtype, editable=False)
 
+    def __unicode__(self):
+        return self.subobj.__unicode__()
+
     @property
     def current_groups(self):
         groups_str = ''
@@ -375,7 +378,11 @@ class Role(models.Model):
     role = CharField(max_length=63, blank=True)
 
     def __unicode__(self):
-        return self.role
+        name = '{:s} in {:s}'. \
+            format(self.contactable.__unicode__(), self.group.__unicode__())
+        if self.role:
+            name = ' as '.join(name, self.role.__unicode__())
+        return name
 
 
 class Comment(Record):
