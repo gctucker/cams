@@ -18,20 +18,20 @@ class Menu(object):
             else:
                 it.current = False
 
-    def get_group_entries(self, page_list, group):
+    def get_group_items(self, group):
         filtered = []
 
-        for p in self.page_list:
-            if p.group == group:
-                filtered.append(p)
+        for i in self.items:
+            if i.group == group:
+                filtered.append(i)
 
         return filtered
 
-    def get_user_entries(self, user):
+    def get_user_items(self, user):
         if user.is_staff:
             return self.items
         else:
-            return self.get_group_entries(Page.COMMON)
+            return self.get_group_items(Menu.Item.COMMON)
 
     class Item(object):
         COMMON = 0
