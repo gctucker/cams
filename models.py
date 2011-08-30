@@ -19,6 +19,7 @@ class Record(models.Model):
     status = PositiveSmallIntegerField(choices=xstatus, default=ACTIVE)
     created = DateTimeField(auto_now_add=True)
 
+    @property
     def status_str(self):
         return Record.xstatus[self.status][1]
 
@@ -419,6 +420,7 @@ class Application(models.Model):
     status = PositiveSmallIntegerField(choices=xstatus, default=PENDING)
     created = DateTimeField(auto_now_add=True)
 
+    @property
     def status_str(self):
         return Application.xstatus[self.status][1]
 
@@ -450,6 +452,7 @@ class Invoice(models.Model):
     paid = DateTimeField(null=True, blank=True)
     banked = DateTimeField(null=True, blank=True)
 
+    @property
     def status_str(self):
         return Invoice.xstatus[self.status][1]
 
