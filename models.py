@@ -275,6 +275,10 @@ class Fair(models.Model):
 
             super(Fair, self).save(*args, **kwargs)
 
+    @classmethod
+    def get_current(cls):
+        return cls.objects.filter(current=True)[0]
+
     class Meta(object):
         ordering = ['-date']
 
