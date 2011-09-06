@@ -133,6 +133,10 @@ class Person(Contactable):
         else:
             return ''
 
+    @property
+    def members_list(self):
+        return self.member_set
+
 #    ToDo: create a proxy model and add this in the 'extra' app
 #    def get_absolute_url(self):
 #        return URL_PREFIX + "abook/person/%i" % self.id
@@ -164,6 +168,10 @@ class Organisation(Contactable):
 
 #    def get_absolute_url(self):
 #        return URL_PREFIX + "abook/org/%i" % self.id
+
+    @property
+    def members_list(self):
+        return Member.objects.filter(organisation=self)
 
     class Meta(object):
         ordering = ['name']
