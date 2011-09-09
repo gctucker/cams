@@ -116,6 +116,10 @@ class Person(Contactable):
             name += ' ' + self.middle_name
         return name + ' ' + self.last_name
 
+    def save(self, *args, **kwargs):
+        self.type = Contactable.PERSON
+        super(Contactable, self).save(args, kwargs)
+
     @property
     def name_nn(self):
         name = self.__unicode__()
@@ -123,23 +127,15 @@ class Person(Contactable):
             name += ' (' + self.nickname + ')'
         return name
 
-    def save(self, *args, **kwargs):
-        self.type = Contactable.PERSON
-        super(Contactable, self).save(args, kwargs)
-
+    @property
     def title_str(self):
-        if self.title != None:
-            return Person.xtitle[self.title][1]
-        else:
+        if self.title is None:
             return ''
+        return Person.xtitle[self.title][1]
 
     @property
     def members_list(self):
         return self.member_set
-
-#    ToDo: create a proxy model and add this in the 'extra' app
-#    def get_absolute_url(self):
-#        return URL_PREFIX + "abook/person/%i" % self.id
 
     class Meta(object):
         ordering = ['first_name', 'last_name']
@@ -155,19 +151,16 @@ class Organisation(Contactable):
     def __unicode__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        self.type = Contactable.ORGANISATION
+        super(Contactable, self).save(args, kwargs)
+
     @property
     def name_nn(self):
         name = self.name
         if self.nickname:
             name += ' (' + self.nickname + ')'
         return name
-
-    def save(self, *args, **kwargs):
-        self.type = Contactable.ORGANISATION
-        super(Contactable, self).save(args, kwargs)
-
-#    def get_absolute_url(self):
-#        return URL_PREFIX + "abook/org/%i" % self.id
 
     @property
     def members_list(self):
@@ -251,7 +244,7 @@ class Fair(models.Model):
     date = DateField(unique=True)
     description = TextField(blank=True)
     current = BooleanField(help_text=
-                            "There must be one and only one current fair.")
+                           "There must be one and only one current fair.")
 
     def __unicode__(self):
         return str(self.date.year)
@@ -391,10 +384,10 @@ class Role(models.Model):
     role = CharField(max_length=63, blank=True)
 
     def __unicode__(self):
-        name = u'{:s} in {:s}'. \
-            format(self.contactable.__unicode__(), self.group.__unicode__())
+        name = u' in '.join([self.contactable.__unicode__(),
+                             self.group.__unicode__()])
         if self.role:
-            name = ' as '.join(name, self.role.__unicode__())
+            name = u' as '.join([name, self.role.__unicode__()])
         return name
 
 
@@ -408,7 +401,7 @@ class Comment(Record):
             name = p.person.__unicode__()
         except Player.DoesNotExist:
             name = self.author.__unicode__()
-
+        # ToDo: what about name ?
         return get_first_words(self.text)
 
     class Meta(object):
@@ -444,7 +437,7 @@ class EventApplication(Application):
     event = ForeignKey(Event)
 
     def __unicode__(self):
-        return u'{:s} for {:s}'.format(self.person, self.event)
+        return u' for '.join([self.person, self.event])
 
 
 class Invoice(models.Model):
