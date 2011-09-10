@@ -230,8 +230,8 @@ class Contact(Record):
 
         return contact
 
-    def get_address(self):
-        return get_obj_address(self)
+    def get_address(self, sep=', '):
+        return get_obj_address(self, sep)
 
     class Meta(object):
         db_table = 'cams_abook_contact'

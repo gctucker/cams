@@ -137,27 +137,19 @@ def get_time_string():
 
 # ToDo: that should really go away eventually
 # (class methods in the models should be able to do that in a nicer way)
-def get_obj_address(obj):
-    address = ''
-
+def get_obj_address(obj, sep):
+    addr = []
     if obj.line_1:
-        address = obj.line_1
+        addr.append(obj.line_1)
         if obj.line_2:
-            address += ', ' + obj.line_2
+            addr.append(obj.line_2)
             if obj.line_3:
-                address += ', ' + obj.line_3
-
+                addr.append(obj.line_3)
     if obj.town:
-        if address:
-            address += ', '
-        address += obj.town
-
+        addr.append(obj.town)
     if obj.postcode:
-        if address:
-            address += ', '
-        address += obj.postcode
-
-    return address
+        addr.append(obj.postcode)
+    return sep.join(addr)
 
 def make_group_file_name (group, sx = ''):
     if group.fair:
