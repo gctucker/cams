@@ -214,7 +214,7 @@ class Contact(Record):
                      "Order of the premises on side streets around Mill Road.")
 
     def __unicode__(self):
-        contact = get_obj_address(self)
+        contact = self.get_address()
 
         if not contact:
             if self.email:
