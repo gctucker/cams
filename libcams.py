@@ -1,5 +1,7 @@
 import csv
 import datetime
+from django.conf.urls.defaults import url as django_url
+from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 
 CAMS_VERSION = (0, 2, 0)
@@ -8,41 +10,73 @@ CAMS_VERSION = (0, 2, 0)
 # Main menu
 
 class Menu(object):
-    def __init__(self, items):
-        self.items = items
+    def __init__(self):
+        self._items = []
 
-    def set_current(self, name):
-        for it in self.items:
-            if it.name == name:
+    # ToDo: get the namespace from the urlpatterns?
+    def add(self, urlpatterns=[], items=[], namespace=''):
+        url_perms = dict()
+        for url in urlpatterns:
+            url_name = getattr(url, 'name', None)
+            if url_name is None:
+                continue
+            try:
+                cls = getattr(url, 'viewcls')
+                perms = getattr(cls, 'perms')
+            except AttributeError:
+                perms = []
+            url_perms[url_name] = perms
+        for item in items:
+            if not item.perms:
+                item.perms = url_perms.get(item.url_name, [])
+            if namespace:
+                item.url_name = ':'.join([namespace, item.url_name])
+            self._items.append(item)
+
+    def get_user_items(self, user):
+        for it in self._items:
+            if it.user_authorised(user):
+                yield it
+
+    def set_current(self, url_name):
+        for it in self._items:
+            if it.url_name == url_name:
                 it.current = True
             else:
                 it.current = False
 
-    def get_group_items(self, group):
-        filtered = []
-
-        for i in self.items:
-            if i.group == group:
-                filtered.append(i)
-
-        return filtered
-
-    def get_user_items(self, user):
-        if user.is_staff:
-            return self.items
-        else:
-            return self.get_group_items(Menu.Item.COMMON)
-
     class Item(object):
-        COMMON = 0
-        ADMIN = 1
+        def __init__(self, url_name, title='', perms=[]):
+            self.url_name = url_name
+            self._url = None
+            if not title:
+                self.title = url_name
+            else:
+                self.title = title
+            self.perms = perms
+            self.current = False
 
-        def __init__(self, name, url, title, group, current=False):
-            self.name = name
-            self.url = url
-            self.title = title
-            self.group = group
-            self.current = current
+        def __str__(self):
+            return ', '.join([self.url_name, self.title, str(self.perms)])
+
+        @property
+        def url(self):
+            if self._url is None:
+                self._url = reverse(self.url_name)
+            return self._url
+
+        def user_authorised(self, user):
+            for p in self.perms:
+                if not user.has_perm(p):
+                    return False
+            return True
+
+    class StaffItem(Item):
+        def __init__(self, url_name, title=''):
+            super(Menu.StaffItem, self).__init__(url_name, title)
+
+        def user_authorised(self, user):
+            return user.is_staff
 
 
 # -----------------------------------------------------------------------------
@@ -141,3 +175,8 @@ def get_user_email(user):
         return user.player.person.contact_set.exclude(email='')[0].email
     except IndexError:
         return None
+
+def urlcls(regex, cls, **kw):
+    url_obj = django_url(regex, cls.as_view(), **kw)
+    url_obj.viewcls = cls
+    return url_obj
