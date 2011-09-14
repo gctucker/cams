@@ -1,5 +1,6 @@
 import csv
 import datetime
+import logging
 from django.conf.urls.defaults import url as django_url
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
@@ -101,6 +102,53 @@ class CSVFileResponse(object):
     @property
     def response(self):
         return self._resp
+
+# -----------------------------------------------------------------------------
+# Logging
+
+class History(object):
+    format = \
+'[%(asctime)s][User:%(uid)i][%(otype)s:%(oid)i][%(action)s] %(message)s'
+    datefmt = '%Y.%m.%d %H.%M.%S'
+
+    def __init__(self, logger_name):
+        self._logger = logging.getLogger(logger_name)
+
+    def create(self, user, obj, fields):
+        self._log(user, obj, 'CREATE', self._make_msg(obj, fields))
+
+    def edit(self, user, obj, fields):
+        self._log(user, obj, 'EDIT', self._make_msg(obj, fields))
+
+    def edit_form(self, user, form):
+        return self.edit(user, form.instance, form.changed_data)
+
+    def delete(self, user, obj):
+        self._log(user, obj, 'DELETE', '')
+
+    def _make_msg(self, obj, fields):
+        msg_str = []
+        for it in fields:
+            value = getattr(obj, '{}_str'.format(it), None)
+            if not value:
+                value = getattr(obj, it)
+            pk = getattr(value, 'pk', None)
+            if not pk:
+                value = str(value).replace('\\', '\\\\').replace('\"', '\\\"')
+                value = '\"{}\"'.format(value)
+            else:
+                value = ':'.join([value.__class__.__name__, str(value.pk)])
+            msg_str.append('{}: {}'.format(it, value))
+        return ', '.join(msg_str)
+
+    def _log(self, user, obj, action, msg):
+        e = {'uid': user.id, 'action': action, 'otype': type(obj).__name__,
+             'oid': obj.pk}
+        self._logger.info(msg, extra=e)
+
+    def unescape(self, txt):
+        return txt.replace('\\\"', '\"').replace('\\\\', '\\')
+
 
 # -----------------------------------------------------------------------------
 # Helpers
