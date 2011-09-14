@@ -111,8 +111,12 @@ class History(object):
 '[%(asctime)s][User:%(uid)i][%(otype)s:%(oid)i][%(action)s] %(message)s'
     datefmt = '%Y.%m.%d %H.%M.%S'
 
-    def __init__(self, logger_name):
+    def __init__(self, logger_name, plain_logger_name=None):
         self._logger = logging.getLogger(logger_name)
+        if plain_logger_name:
+            self._plain_logger = logging.getLogger(plain_logger_name)
+        else:
+            self._plain_logger = None
 
     def create(self, user, obj, fields):
         self._log(user, obj, 'CREATE', self._make_msg(obj, fields))
@@ -129,22 +133,26 @@ class History(object):
     def _make_msg(self, obj, fields):
         msg_str = []
         for it in fields:
-            value = getattr(obj, '{}_str'.format(it), None)
-            if not value:
-                value = getattr(obj, it)
-            pk = getattr(value, 'pk', None)
+            x = getattr(obj, '{}_str'.format(it), None)
+            if not x:
+                x = getattr(obj, it)
+            pk = getattr(x, 'pk', None)
             if not pk:
-                value = str(value).replace('\\', '\\\\').replace('\"', '\\\"')
-                value = '\"{}\"'.format(value)
+                x = unicode(x).replace('\\', '\\\\').replace('\"', '\\\"')
+                x = u'\"{}\"'.format(x)
             else:
-                value = ':'.join([value.__class__.__name__, str(value.pk)])
-            msg_str.append('{}: {}'.format(it, value))
-        return ', '.join(msg_str)
+                x = u':'.join([x.__class__.__name__, unicode(x.pk)])
+            msg_str.append(u'{}: {}'.format(it, x))
+        return u', '.join(msg_str)
 
     def _log(self, user, obj, action, msg):
         e = {'uid': user.id, 'action': action, 'otype': type(obj).__name__,
              'oid': obj.pk}
         self._logger.info(msg, extra=e)
+        if self._plain_logger:
+            plain_msg = u'{} {} [{}:{}] {}'. \
+                format(user.username, action, e['otype'], e['oid'], msg)
+            self._plain_logger.info(plain_msg)
 
     def unescape(self, txt):
         return txt.replace('\\\"', '\"').replace('\\\\', '\\')
