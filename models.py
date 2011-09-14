@@ -185,8 +185,8 @@ class Member(Contactable):
     person = ForeignKey(Person)
 
     def __unicode__(self):
-        return '{:s}, member of {:s}'.format(self.person.__unicode__(),
-                                             self.organisation.__unicode__())
+        return u'{}, member of {}'.format(self.person.__unicode__(),
+                                          self.organisation.__unicode__())
 
     def save(self, *args, **kwargs):
         self.type = Contactable.MEMBER
@@ -371,7 +371,7 @@ class Group(models.Model):
 
     def __unicode__(self):
         if self.fair:
-            return '{:s} ({:s})'.format(self.name, self.fair.__unicode__())
+            return u'{:s} ({:s})'.format(self.name, self.fair.__unicode__())
         else:
             return self.name
 
@@ -391,7 +391,7 @@ class Role(models.Model):
     role = CharField(max_length=63, blank=True)
 
     def __unicode__(self):
-        name = '{:s} in {:s}'. \
+        name = u'{:s} in {:s}'. \
             format(self.contactable.__unicode__(), self.group.__unicode__())
         if self.role:
             name = ' as '.join(name, self.role.__unicode__())
@@ -444,7 +444,7 @@ class EventApplication(Application):
     event = ForeignKey(Event)
 
     def __unicode__(self):
-        return '{:s} for {:s}'.format(self.person, self.event)
+        return u'{:s} for {:s}'.format(self.person, self.event)
 
 
 class Invoice(models.Model):
