@@ -43,6 +43,13 @@ class Contactable(Record):
     def __unicode__(self):
         return self.subobj.__unicode__()
 
+    def save(self, *args, **kwargs):
+        super(Contactable, self).save(*args, **kwargs)
+        members = getattr(self, 'members_list', None)
+        if members:
+            for m in members.all():
+                m.update_status()
+
     @property
     def current_groups(self):
         groups_str = ''
@@ -118,7 +125,7 @@ class Person(Contactable):
 
     def save(self, *args, **kwargs):
         self.type = Contactable.PERSON
-        super(Contactable, self).save(args, kwargs)
+        super(Person, self).save(*args, **kwargs)
 
     @property
     def name_nn(self):
@@ -153,7 +160,7 @@ class Organisation(Contactable):
 
     def save(self, *args, **kwargs):
         self.type = Contactable.ORGANISATION
-        super(Contactable, self).save(args, kwargs)
+        super(Organisation, self).save(*args, **kwargs)
 
     @property
     def name_nn(self):
@@ -183,7 +190,21 @@ class Member(Contactable):
 
     def save(self, *args, **kwargs):
         self.type = Contactable.MEMBER
-        super(Contactable, self).save(args, kwargs)
+        super(Member, self).save(args, kwargs)
+
+    def update_status(self):
+        old_status = self.status
+        if ((self.organisation.status == Record.NEW)
+            or (self.person.status == Record.NEW)):
+            self.status = Record.NEW
+        elif ((self.organisation.status == Record.DISABLED)
+            or (self.person.status == Record.DISABLED)):
+            self.status = Record.DISABLED
+        elif ((self.organisation.status == Record.ACTIVE)
+              and (self.person.status == Record.ACTIVE)):
+            self.status = Record.ACTIVE
+        if self.status != old_status:
+            self.save()
 
     class Meta(object):
         unique_together = (('organisation', 'person'))
