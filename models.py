@@ -180,7 +180,7 @@ class Organisation(Contactable):
 
 class Member(Contactable):
     title = CharField(max_length=63, blank=True, help_text=
-                       "Role of that person within the organisation.")
+                      "Role of that person within the organisation.")
     organisation = ForeignKey('Organisation', related_name='member_org')
     person = ForeignKey(Person)
 
@@ -190,7 +190,7 @@ class Member(Contactable):
 
     def save(self, *args, **kwargs):
         self.type = Contactable.MEMBER
-        super(Member, self).save(args, kwargs)
+        super(Member, self).save(*args, **kwargs)
 
     def update_status(self):
         old_status = self.status
@@ -281,8 +281,6 @@ class Fair(models.Model):
             for f in Fair.objects.all():
                 if f.current == True and f != self:
                     f.current = False
-                    # ToDo: force save without test for uniqueness
-                    # (add a keyword to the call)
                     f.save()
         else:
             found = False
@@ -506,7 +504,7 @@ class Invoice(models.Model):
             self.paid = None
             self.banked = None
 
-        super(Invoice, self).save(args, kwargs)
+        super(Invoice, self).save(*args, **kwargs)
 
     class Meta(object):
         abstract = True
