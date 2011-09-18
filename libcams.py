@@ -2,7 +2,6 @@ import csv
 import datetime
 import logging
 import fileinput
-import copy
 from django.conf.urls.defaults import url as django_url
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
@@ -162,28 +161,8 @@ class HistoryParser(object):
         self._classes = classes
         self._data = None
 
-    def all(self):
-        return self._get_data()
-
-    def abook(self):
-        from cams.models import Person, Organisation, Contact, Member
-        abook = []
-        for it in self._get_data():
-            if it.obj.__class__ not in (Person, Organisation, Contact, Member):
-                continue
-            if it.obj.__class__ in (Contact, Member):
-                it = copy.copy(it)
-                if it.obj.__class__ == Contact:
-                    it.obj = it.obj.obj.subobj
-                    it.args = ': '.join(['contact', it.args])
-                if it.obj.__class__ == Member:
-                    it.obj = it.obj.person
-                    it.args = ': '.join([it.action.lower(), 'member', it.args])
-                    it.action = 'EDIT'
-            abook.append(it)
-        return abook
-
-    def _get_data(self):
+    @property
+    def data(self):
         if not self._data:
             self._parse()
         return self._data
