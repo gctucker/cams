@@ -104,13 +104,9 @@ class CSVFileResponse(object):
         return self._resp
 
 # -----------------------------------------------------------------------------
-# Logging
+# History
 
-class History(object):
-    format = \
-'[%(asctime)s][User:%(uid)i][%(otype)s:%(oid)i][%(action)s] %(message)s'
-    datefmt = '%Y.%m.%d %H.%M.%S'
-
+class HistoryLogger(object):
     def __init__(self, logger_name, plain_logger_name=None):
         self._logger = logging.getLogger(logger_name)
         if plain_logger_name:
