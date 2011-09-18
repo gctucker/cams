@@ -1,6 +1,8 @@
 import csv
 import datetime
 import logging
+import fileinput
+import copy
 from django.conf.urls.defaults import url as django_url
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
@@ -152,6 +154,93 @@ class HistoryLogger(object):
 
     def unescape(self, txt):
         return txt.replace('\\\"', '\"').replace('\\\\', '\\')
+
+
+class HistoryParser(object):
+    def __init__(self, file_name, classes):
+        self._file_name = file_name
+        self._classes = classes
+        self._data = None
+
+    def all(self):
+        return self._get_data()
+
+    def abook(self):
+        from cams.models import Person, Organisation, Contact, Member
+        abook = []
+        for it in self._get_data():
+            if it.obj.__class__ not in (Person, Organisation, Contact, Member):
+                continue
+            if it.obj.__class__ in (Contact, Member):
+                it = copy.copy(it)
+                if it.obj.__class__ == Contact:
+                    it.obj = it.obj.obj.subobj
+                    it.args = ': '.join(['contact', it.args])
+                if it.obj.__class__ == Member:
+                    it.obj = it.obj.person
+                    it.args = ': '.join([it.action.lower(), 'member', it.args])
+                    it.action = 'EDIT'
+            abook.append(it)
+        return abook
+
+    def _get_data(self):
+        if not self._data:
+            self._parse()
+        return self._data
+
+    def _parse(self):
+        self._data = []
+        f = fileinput.FileInput(self._file_name, mode='r')
+        for line in f:
+            pline = HistoryParser.Line(line)
+            self._data.insert(0, HistoryParser.Item \
+                (datetime=self._parse_date_time(pline),
+                 user=self._parse_obj(pline),
+                 obj=self._parse_obj(pline),
+                 action=pline.parse_block(),
+                 args=pline.parse_args()))
+        f.close()
+
+    def _parse_date_time(self, pline):
+        block = pline.parse_block()
+        date_ints = []
+        for date_str in block.split(' '):
+            date_ints += [int(x) for x in date_str.split('.')]
+        return datetime.datetime(*date_ints)
+
+    def _parse_obj(self, pline):
+        block = pline.parse_block()
+        obj_class, obj_pk = block.split(':')
+        cls = self._classes[obj_class]
+        try:
+            return cls.objects.get(pk=obj_pk)
+        except cls.DoesNotExist:
+            return None
+
+    class Line(object):
+        def __init__(self, line):
+            self._line = line
+            self._pos = 0
+
+        def parse_block(self):
+            start = self._line.find('[', self._pos)
+            if start == -1:
+                raise Exception("Failed to find block start")
+            start += 1
+            stop = self._line.find(']', start)
+            if stop == -1:
+                raise Exception("Failed to find block end")
+            self._pos = stop + 1
+            return self._line[start:stop]
+
+        def parse_args(self):
+            return self._line[self._pos:].strip()
+
+    class Item(object):
+        def __init__(self, **kw):
+            for k, v in kw.items():
+                setattr(self, k, v)
+
 
 
 # -----------------------------------------------------------------------------
