@@ -167,6 +167,13 @@ class HistoryParser(object):
             self._parse()
         return self._data
 
+    def get_obj_data(self, obj):
+        obj_data = []
+        for it in self.data:
+            if it.obj in obj:
+                obj_data.append(it)
+        return obj_data
+
     def _parse(self):
         self._data = []
         f = fileinput.FileInput(self._file_name, mode='r')
