@@ -26,6 +26,41 @@ class Record(models.Model):
     class Meta(object):
         abstract = True
 
+
+class PinBoard(models.Model):
+    OPEN = 0
+    LOCKED = 1
+
+    xstatus = ((OPEN, 'open'), (LOCKED, 'locked'))
+
+    status = PositiveSmallIntegerField(choices=xstatus, default=OPEN)
+    name = CharField(max_length=128)
+    description = TextField(blank=True)
+
+    @property
+    def status_str(self):
+        return PinBoard.xstatus[self.status][1]
+
+
+class Pin(models.Model):
+    board = ForeignKey(PinBoard)
+
+    @property
+    def parent(self):
+        return getattr(self, 'parent_field', None)
+
+    # Entries must not be pinned more than once on each board
+    def is_on_board(self, board):
+        if board == self.board:
+            return True
+        p = self.parent
+        if p:
+            return p.is_on_board(board)
+        return False
+
+    class Meta(object):
+        abstract = True
+
 # -----------------------------------------------------------------------------
 # address book
 
