@@ -328,6 +328,8 @@ class Item(Record):
 
 
 class Event(Item):
+    master = ForeignKey('self', blank=True, null=True,
+                        help_text="Master event entry")
     team = ManyToManyField(Person, related_name='event_team', through='Actor')
     date = DateField()
     time = TimeField(blank=True, null=True, verbose_name="start time")
