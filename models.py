@@ -458,7 +458,8 @@ class EventApplication(Application):
     event = ForeignKey(Event)
 
     def __unicode__(self):
-        return u' for '.join([self.person, self.event])
+        return u' for '.join([self.person.__unicode__(),
+                              self.event.__unicode__()])
 
 
 class Invoice(models.Model):
