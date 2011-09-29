@@ -251,8 +251,8 @@ class Contact(Record):
 
         return contact
 
-    def get_address(self, sep=', '):
-        return get_obj_address(self, sep)
+    def get_address(self, *args):
+        return get_obj_address(self, *args)
 
     class Meta(object):
         db_table = 'cams_abook_contact'

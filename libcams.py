@@ -264,7 +264,7 @@ def get_time_string():
 
 # ToDo: that should really go away eventually
 # (class methods in the models should be able to do that in a nicer way)
-def get_obj_address(obj, sep):
+def get_obj_address(obj, sep=', '):
     addr = []
     if obj.line_1:
         addr.append(obj.line_1)
