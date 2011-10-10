@@ -84,6 +84,13 @@ class Contactable(Record):
         elif self.type == Contactable.MEMBER:
             return self.member
 
+    @property
+    def current_roles(self):
+        roles = Role.objects.filter(contactable=self)
+        roles = roles.filter(Q(group__fair=Fair.get_current())
+                             | Q(group__fair__isnull=True))
+        return roles
+
     class Meta(object):
         db_table = 'cams_abook_contactable'
         permissions = (
