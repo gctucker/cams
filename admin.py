@@ -155,5 +155,5 @@ class EventApplicationAdmin(ApplicationAdmin):
 
 class InvoiceAdmin(admin.ModelAdmin):
     list_display = ['__unicode__', 'amount', 'status', 'created', 'sent',
-                    'paid', 'banked']
-    exclude = ['sent', 'paid', 'banked']
+                    'paid']
+    exclude = ['sent', 'paid']

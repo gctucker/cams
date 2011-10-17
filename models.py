@@ -466,10 +466,8 @@ class Invoice(models.Model):
     NEW = 0
     SENT = 1
     PAID = 2
-    BANKED = 3
 
-    xstatus = ((NEW, 'New'), (SENT, 'Sent'),
-               (PAID, 'Paid'), (BANKED, 'Banked'))
+    xstatus = ((NEW, 'New'), (SENT, 'Sent'), (PAID, 'Paid'))
 
     status = PositiveSmallIntegerField(choices=xstatus, default=NEW)
     reference = CharField(max_length=63, blank=True)
@@ -477,7 +475,6 @@ class Invoice(models.Model):
     created = DateTimeField(auto_now_add=True)
     sent = DateTimeField(null=True, blank=True)
     paid = DateTimeField(null=True, blank=True)
-    banked = DateTimeField(null=True, blank=True)
 
     @property
     def status_str(self):
@@ -493,19 +490,11 @@ class Invoice(models.Model):
             if self.status > Invoice.SENT:
                 if not self.paid:
                     self.paid = now
-
-                if self.status > Invoice.PAID:
-                    if not self.banked:
-                        self.banked = now
-                else:
-                    self.banked = None
             else:
                 self.paid = None
-                self.banked = None
         else:
             self.sent = None
             self.paid = None
-            self.banked = None
 
         super(Invoice, self).save(*args, **kwargs)
 
