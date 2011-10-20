@@ -466,8 +466,10 @@ class Invoice(models.Model):
     NEW = 0
     SENT = 1
     PAID = 2
+    CANCELLED = 3
 
-    xstatus = ((NEW, 'New'), (SENT, 'Sent'), (PAID, 'Paid'))
+    xstatus = ((NEW, 'New'), (SENT, 'Sent'), (PAID, 'Paid'),
+               (CANCELLED, 'Cancelled'))
 
     status = PositiveSmallIntegerField(choices=xstatus, default=NEW)
     reference = CharField(max_length=63, blank=True)
@@ -475,28 +477,35 @@ class Invoice(models.Model):
     created = DateTimeField(auto_now_add=True)
     sent = DateTimeField(null=True, blank=True)
     paid = DateTimeField(null=True, blank=True)
+    cancelled = DateTimeField(null=True, blank=True)
+
+    stat_trans_dict = {
+        NEW: [SENT, CANCELLED],
+        SENT: [PAID, CANCELLED],
+        PAID: [],
+        CANCELLED: [],
+        }
 
     @property
     def status_str(self):
         return Invoice.xstatus[self.status][1]
 
-    def save(self, *args, **kwargs):
+    @property
+    def stat_trans(self):
+        return self.stat_trans_dict[self.status]
+
+    def update_status(self, new_status):
+        if new_status not in self.stat_trans:
+            raise Exception('invalid invoice status transition: {} -> {}'.
+                            format(self.status, new_status))
+        self.status = new_status
         now = datetime.now()
-
-        if self.status > Invoice.NEW:
-            if not self.sent:
-                self.sent = now
-
-            if self.status > Invoice.SENT:
-                if not self.paid:
-                    self.paid = now
-            else:
-                self.paid = None
-        else:
-            self.sent = None
-            self.paid = None
-
-        super(Invoice, self).save(*args, **kwargs)
+        if self.status == Invoice.SENT:
+            self.sent = now
+        elif self.status == Invoice.PAID:
+            self.paid = now
+        elif self.status == Invoice.CANCELLED:
+            self.cancelled = now
 
     class Meta(object):
         abstract = True
