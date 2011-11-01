@@ -197,7 +197,9 @@ class HistoryParser(object):
     def _parse_obj(self, pline):
         block = pline.parse_block()
         obj_class, obj_pk = block.split(':')
-        cls = self._classes[obj_class]
+        cls = self._classes.get(obj_class)
+        if not cls:
+            return None
         try:
             return cls.objects.get(pk=obj_pk)
         except cls.DoesNotExist:
