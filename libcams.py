@@ -118,11 +118,14 @@ class HistoryLogger(object):
     def create(self, user, obj, fields):
         self._log(user, obj, 'CREATE', self._make_msg(obj, fields))
 
+    def create_form(self, user, form, extra=[]):
+        self.create(user, form.instance, form.fields.keys() + extra)
+
     def edit(self, user, obj, fields):
         self._log(user, obj, 'EDIT', self._make_msg(obj, fields))
 
-    def edit_form(self, user, form):
-        return self.edit(user, form.instance, form.changed_data)
+    def edit_form(self, user, form, extra=[]):
+        self.edit(user, form.instance, form.changed_data + extra)
 
     def delete(self, user, obj):
         self._log(user, obj, 'DELETE', '')
