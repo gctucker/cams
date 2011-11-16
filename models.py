@@ -415,7 +415,7 @@ class Role(models.Model):
         name = u' in '.join([self.contactable.__unicode__(),
                              self.group.__unicode__()])
         if self.role:
-            name = u' as '.join([name, self.role.__unicode__()])
+            name = u' as '.join([name, self.role])
         return name
 
 
