@@ -357,6 +357,22 @@ class Event(Item):
 
         return str(when)
 
+    @property
+    def main_id(self):
+        if self.master:
+            return self.master.pk
+        return self.pk
+
+    # ToDo: generalise and use as a principle for the pinboard feature
+    # ToDo: support infinite recursion instead of just one master level ?
+    @classmethod
+    def get_for_fair(cls, event_id, fair):
+        ev = cls.objects.filter(Q(pk=event_id) | Q(master=event_id))
+        ev = ev.filter(fair=fair)
+        if len(ev):
+            return ev[0]
+        return None
+
     class Meta(object):
         ordering = ['name']
         permissions = (
