@@ -1,3 +1,4 @@
+import os
 import csv
 import datetime
 import logging
@@ -159,10 +160,16 @@ class HistoryLogger(object):
 
 
 class HistoryParser(object):
+    cache = dict()
+
     def __init__(self, file_name, classes):
         self._file_name = file_name
         self._classes = classes
-        self._data = None
+        mtime = os.path.getmtime(self._file_name)
+        cache_mtime, self._data = \
+            self.cache.setdefault(self._file_name, (mtime, list()))
+        if mtime > cache_mtime:
+            self._data = list()
 
     @property
     def data(self):
@@ -189,6 +196,8 @@ class HistoryParser(object):
                  action=pline.parse_block(),
                  args=pline.parse_args()))
         f.close()
+        mtime = os.path.getmtime(self._file_name)
+        self.cache[self._file_name] = (mtime, self._data)
 
     def _parse_date_time(self, pline):
         block = pline.parse_block()
