@@ -165,11 +165,8 @@ class HistoryParser(object):
     def __init__(self, file_name, classes):
         self._file_name = file_name
         self._classes = classes
-        mtime = os.path.getmtime(self._file_name)
-        cache_mtime, self._data = \
-            self.cache.setdefault(self._file_name, (mtime, list()))
-        if mtime > cache_mtime:
-            self._data = list()
+        self._data = list()
+        self._f = None
 
     @property
     def data(self):
@@ -184,20 +181,38 @@ class HistoryParser(object):
                 obj_data.append(it)
         return obj_data
 
-    def _parse(self):
-        self._data = []
-        f = fileinput.FileInput(self._file_name, mode='r')
-        for line in f:
-            pline = HistoryParser.Line(line)
-            self._data.insert(0, HistoryParser.Item \
-                (datetime=self._parse_date_time(pline),
-                 user=self._parse_obj(pline),
-                 obj=self._parse_obj(pline),
-                 action=pline.parse_block(),
-                 args=pline.parse_args()))
-        f.close()
-        mtime = os.path.getmtime(self._file_name)
-        self.cache[self._file_name] = (mtime, self._data)
+    def open(self):
+        self._f = open(self._file_name, 'r')
+        self._mtime = os.path.getmtime(self._file_name)
+        cache_mtime, self._data, self._lines = \
+            self.cache.setdefault(self._file_name, (None, list(), list()))
+        if self._mtime != cache_mtime:
+            self._data = list()
+            self._lines = self._f.readlines()
+
+    def close(self):
+        self._f.close()
+        self._f = None
+        self.cache[self._file_name] = (self._mtime, self._data, self._lines)
+
+    def get_line(self, i):
+        if self._f is None:
+            raise Exception('History log file not open')
+        while len(self._data) < (i + 1):
+            try:
+                line = self._lines.pop(-1)
+                if not line:
+                    return None
+                pline = HistoryParser.Line(line)
+                self._data.append(HistoryParser.Item \
+                    (datetime=self._parse_date_time(pline),
+                     user=self._parse_obj(pline),
+                     obj=self._parse_obj(pline),
+                     action=pline.parse_block(),
+                     args=pline.parse_args()))
+            except IndexError:
+                return None
+        return self._data[i]
 
     def _parse_date_time(self, pline):
         block = pline.parse_block()
@@ -217,6 +232,7 @@ class HistoryParser(object):
         except cls.DoesNotExist:
             return None
 
+
     class Line(object):
         def __init__(self, line):
             self._line = line
@@ -235,6 +251,7 @@ class HistoryParser(object):
 
         def parse_args(self):
             return self._line[self._pos:].strip()
+
 
     class Item(object):
         def __init__(self, **kw):
