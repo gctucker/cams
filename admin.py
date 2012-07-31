@@ -93,8 +93,8 @@ class MemberAdmin(ContactableAdmin):
 
 class GroupAdmin(admin.ModelAdmin):
     list_display = ['__unicode__', 'description']
-    search_fields = ['name', 'fair__date']
-    list_filter = ['fair']
+    search_fields = ['name', 'board']
+    list_filter = ['board']
 
 
 class FairAdmin(admin.ModelAdmin):
