@@ -41,15 +41,28 @@ class PinBoard(models.Model):
     def status_str(self):
         return PinBoard.xstatus[self.status][1]
 
+    def __unicode__(self):
+        return self.name
+
 
 class Pin(models.Model):
-    board = ForeignKey(PinBoard)
+    board = ForeignKey(PinBoard, blank=True, null=True,
+                       on_delete=models.SET_NULL) # ToDo: Really SET_NULL ?
+    parent = ForeignKey('self', blank=True, null=True)
 
-    @property
-    def parent(self):
-        return getattr(self, 'parent_field', None)
+    def save(self, *args, **kwargs):
+        if self.board is None or self.board.status == PinBoard.OPEN:
+            super(Pin, self).save(*args, **kwargs)
+        else:
+            raise Exception('Pin board not open')
 
-    # Entries must not be pinned more than once on each board
+    def format_pin_name(self, string):
+        if self.board:
+            return '{0} [{1}]'.format(string, self.board.name)
+        else:
+            return string
+
+    # Entries must not be pinned down more than once on each board
     def is_on_board(self, board):
         if board == self.board:
             return True
@@ -89,8 +102,7 @@ class Contactable(Record):
     def current_groups(self):
         groups_str = ''
         if self.group_set:
-            groups = self.group_set.filter(Q(fair__current=True)
-                                           | Q(fair__isnull=True))
+            groups = self.group_set.filter(board__isnull=True)
             for g in groups:
                 if groups_str:
                     groups_str += ', '
@@ -122,8 +134,7 @@ class Contactable(Record):
     @property
     def current_roles(self):
         roles = Role.objects.filter(contactable=self)
-        roles = roles.filter(Q(group__fair=Fair.get_current())
-                             | Q(group__fair__isnull=True))
+        roles = roles.filter(Q(group__board__isnull=True))
         return roles
 
     class Meta(object):
@@ -357,6 +368,7 @@ class Player(Record):
 
 
 class Item(Record):
+    # ToDo: remove fair, inherit Record, Pin
     name = CharField(max_length=63)
     description = TextField(blank=True)
     owner = ForeignKey(Person)
@@ -435,20 +447,15 @@ class Actor(Record):
         return self.event.date
 
 
-class Group(models.Model):
+class Group(Pin):
     name = CharField(max_length=31, blank=False, null=False)
-    fair = ForeignKey(Fair, blank=True, null=True)
     description = CharField(max_length=255, blank=True)
     members = ManyToManyField(Contactable, through='Role')
 
     def __unicode__(self):
-        if self.fair:
-            return u'{:s} ({:s})'.format(self.name, self.fair.__unicode__())
-        else:
-            return self.name
+        return self.format_pin_name(self.name)
 
     class Meta(object):
-        unique_together = (('name', 'fair'), )
         ordering = ['name']
         permissions = (
             ('groups_edit', "Can edit groups"),
