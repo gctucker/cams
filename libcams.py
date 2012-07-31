@@ -310,13 +310,13 @@ def get_obj_address(obj, sep=', '):
     return sep.join(addr)
 
 def make_group_file_name (group, sx = ''):
-    if group.fair:
-        year_str = '-%d' % group.fair.date.year
+    if group.board:
+        board_str = '-%s' % board
     else:
-        year_str = ''
+        board_str = ''
 
     return '%s%s%s_%s' % (group.name.replace (' ', '_'),
-                          year_str, sx, get_time_string ())
+                          board_str, sx, get_time_string ())
 
 def get_user_email(user):
     if user.email:
