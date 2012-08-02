@@ -311,7 +311,7 @@ def get_obj_address(obj, sep=', '):
 
 def make_group_file_name (group, sx = ''):
     if group.board:
-        board_str = '-%s' % board
+        board_str = '-%s' % group.board.name.replace (' ', '')
     else:
         board_str = ''
 
