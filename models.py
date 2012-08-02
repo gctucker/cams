@@ -97,6 +97,13 @@ class Pin(models.Model):
                 return p
         return None
 
+    @classmethod
+    def get_boards(cls):
+        boards = set()
+        for g in cls.objects.all():
+            boards.add(g.board)
+        return boards
+
     class Meta(object):
         abstract = True
 
