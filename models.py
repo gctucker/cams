@@ -71,6 +71,32 @@ class Pin(models.Model):
             return p.is_on_board(board)
         return False
 
+    def get_versions(self):
+        vlist = list()
+        p = self
+        while p is not None:
+            vlist.append(p)
+            p = p.parent
+        del(vlist[0])
+        p = self
+        while p is not None:
+            vlist.insert(0, p)
+            res = p.__class__.objects.filter(parent=p)
+            if len(res) > 0:
+                p = res[0]
+            else:
+                p = None
+        return vlist
+
+    def get_current_version(self):
+        return self.get_versions()[0]
+
+    def get_version_for_board(self, board):
+        for p in self.get_versions():
+            if p.board == board:
+                return p
+        return None
+
     class Meta(object):
         abstract = True
 
