@@ -97,6 +97,19 @@ class Pin(models.Model):
                 return p
         return None
 
+    def pin_down(self, board):
+        pinned = self.__class__.objects.get(pk=self.pk)
+        pinned.pk = None
+        pinned.board = board
+        pinned.save()
+        pinned._pin_down_deep_copy(self)
+        self.parent = pinned
+        self.save()
+        return pinned
+
+    def _pin_down_deep_copy(self, current):
+        pass
+
     @classmethod
     def get_boards(cls):
         boards = set()
@@ -487,6 +500,12 @@ class Group(Pin):
 
     def __unicode__(self):
         return self.format_pin_name(self.name)
+
+    def _pin_down_deep_copy(self, current):
+        for r in Role.objects.filter(group=current):
+            r.pk = None
+            r.group = self
+            r.save()
 
     class Meta(object):
         ordering = ['name']
