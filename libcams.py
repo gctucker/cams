@@ -2,7 +2,6 @@ import os
 import csv
 import datetime
 import logging
-import fileinput
 from django.conf.urls.defaults import url as django_url
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
@@ -170,16 +169,7 @@ class HistoryParser(object):
 
     @property
     def data(self):
-        if not self._data:
-            self._parse()
         return self._data
-
-    def get_obj_data(self, obj):
-        obj_data = []
-        for it in self.data:
-            if it.obj in obj:
-                obj_data.append(it)
-        return obj_data
 
     def open(self):
         self._f = open(self._file_name, 'r')
@@ -195,23 +185,20 @@ class HistoryParser(object):
         self._f = None
         self.cache[self._file_name] = (self._mtime, self._data, self._lines)
 
-    def get_line(self, i):
+    def __getitem__(self, i):
         if self._f is None:
             raise Exception('History log file not open')
         while len(self._data) < (i + 1):
-            try:
-                line = self._lines.pop(-1)
-                if not line:
-                    return None
-                pline = HistoryParser.Line(line)
-                self._data.append(HistoryParser.Item \
-                    (datetime=self._parse_date_time(pline),
-                     user=self._parse_obj(pline),
-                     obj=self._parse_obj(pline),
-                     action=pline.parse_block(),
-                     args=pline.parse_args()))
-            except IndexError:
-                return None
+            line = self._lines.pop(-1)
+            if not line:
+                raise IndexError
+            pline = HistoryParser.Line(line)
+            self._data.append(HistoryParser.Item \
+                (datetime=self._parse_date_time(pline),
+                 user=self._parse_obj(pline),
+                 obj=self._parse_obj(pline),
+                 action=pline.parse_block(),
+                 args=pline.parse_args()))
         return self._data[i]
 
     def _parse_date_time(self, pline):
