@@ -127,6 +127,14 @@ class HistoryLogger(object):
     def edit_form(self, user, form, extra=[]):
         self.edit(user, form.instance, form.changed_data + extra)
 
+    def edit_changed(self, user, obj, form):
+        changed_fields = list()
+        for f in obj._meta.fields:
+            if f.name in form.fields.keys():
+                if getattr(obj, f.name) != getattr(form.instance, f.name):
+                    changed_fields.append(f.name)
+        self.edit(user, form.instance, changed_fields)
+
     def delete(self, user, obj):
         self._log(user, obj, 'DELETE', '')
 
