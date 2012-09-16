@@ -1,4 +1,4 @@
-from cams.models import Record, Contactable, Contact, Member
+from cams.models import Record, Contactable, Contact, Member, Role
 
 # -----------------------------------------------------------------------------
 # contacts
@@ -11,17 +11,19 @@ class ExportContact (object):
         self.c = contact
 
 def iterate_group_contacts (group): # ToDo: move into group model ?
-    contactables = group.members.filter (status = Record.ACTIVE)
-    for it in iterate_group_p_contacts (contactables):
-        yield it
-    for it in iterate_group_o_contacts (contactables):
-        yield it
+    roles = Role.objects.filter (group = group)
+    roles = roles.filter (contactable__status = Record.ACTIVE)
+    for it, role in iterate_group_p_contacts (roles):
+        yield it, role
+    for it, role in iterate_group_o_contacts (roles):
+        yield it, role
 
-def iterate_group_p_contacts (contactables):
-    c_people = contactables.filter (type = Contactable.PERSON)
-    c_people = c_people.order_by ('person__last_name')
+def iterate_group_p_contacts (roles):
+    roles_people = roles.filter (contactable__type = Contactable.PERSON)
+    roles_people = roles_people.order_by ('contactable__person__last_name')
 
-    for it in c_people:
+    for role in roles_people:
+        it = role.contactable
         org_name = ''
         c = Contact.objects.filter (obj = it)
         if c:
@@ -42,13 +44,14 @@ def iterate_group_p_contacts (contactables):
                         c = c[0]
                         ctype = 'org'
         if c:
-            yield ExportContact (it.person, ctype, org_name, c)
+            yield ExportContact (it.person, ctype, org_name, c), role
 
-def iterate_group_o_contacts (contactables):
-    c_orgs = contactables.filter (type = Contactable.ORGANISATION)
-    c_orgs = c_orgs.order_by ('organisation__name')
+def iterate_group_o_contacts (roles):
+    roles_orgs = roles.filter (contactable__type = Contactable.ORGANISATION)
+    roles_orgs = roles_orgs.order_by ('contactable__organisation__name')
 
-    for it in c_orgs:
+    for role in roles_orgs:
+        it = role.contactable
         c = Contact.objects.filter (obj = it)
         p = None
         if c:
@@ -70,4 +73,4 @@ def iterate_group_o_contacts (contactables):
                         c = c[0]
                         c_type = 'person'
         if c:
-            yield ExportContact (p, c_type, it.organisation.name, c)
+            yield ExportContact (p, c_type, it.organisation.name, c), role
