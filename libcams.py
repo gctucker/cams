@@ -6,7 +6,7 @@ from django.conf.urls.defaults import url as django_url
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 
-CAMS_VERSION = (0, 4)
+CAMS_VERSION = (0, 5)
 
 # -----------------------------------------------------------------------------
 # Main menu
