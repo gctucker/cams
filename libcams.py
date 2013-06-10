@@ -20,7 +20,7 @@ import os
 import csv
 import datetime
 import logging
-from django.conf.urls.defaults import url as django_url
+from django.conf.urls import url as django_url
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 
