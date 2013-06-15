@@ -188,6 +188,15 @@ class Contactable(Record):
             return None
 
     @property
+    def contacts(self):
+        c = self.contact_set.all()
+        if c.count() == 0:
+            m = self.members_list.all()
+            if m.count() > 0:
+                c = m[0].contact_set.all()
+        return c
+
+    @property
     def type_str(self):
         return Contactable.xtype[self.type][1]
 
