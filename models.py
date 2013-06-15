@@ -340,6 +340,10 @@ class Member(Contactable):
         if self.status != old_status:
             self.save()
 
+    @property
+    def name_nn(self):
+        return self.person.name_nn
+
     class Meta(object):
         unique_together = (('organisation', 'person'))
         db_table = 'cams_abook_member'
