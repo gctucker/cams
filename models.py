@@ -151,16 +151,21 @@ class Contactable(Record):
 
     # ToDo: rename to something else as `type' is a built-in function name
     type = PositiveSmallIntegerField(choices=xtype, editable=False)
+    basic_name = CharField(max_length=255)
 
     def __unicode__(self):
         return self.subobj.__unicode__()
 
     def save(self, *args, **kwargs):
+        self._update_basic_name();
         super(Contactable, self).save(*args, **kwargs)
         members = getattr(self, 'members_list', None)
         if members:
             for m in members.all():
                 m.update_status()
+
+    def _update_basic_name(self):
+        self.basic_name = self.__unicode__()
 
     @property
     def current_groups(self):
@@ -308,6 +313,9 @@ class Member(Contactable):
     def save(self, *args, **kwargs):
         self.type = Contactable.MEMBER
         super(Member, self).save(*args, **kwargs)
+
+    def _update_basic_name(self):
+        self.basic_name = self.person.basic_name
 
     def update_status(self):
         old_status = self.status
