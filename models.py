@@ -217,6 +217,7 @@ class Contactable(Record):
 
     class Meta(object):
         db_table = 'cams_abook_contactable'
+        ordering = ['basic_name']
         permissions = (
             ('abook_edit', "Can edit address book entries"),
             ('abook_add', "Can add address book entries"),
